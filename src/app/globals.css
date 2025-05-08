@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer utilities {
+  .rbc-off-range-bg {
+    @apply !bg-red-900 !text-white;
+  }
+
+  .rbc-today {
+    @apply !bg-green-700 !text-white;
+  }
+}
