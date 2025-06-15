@@ -28,11 +28,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const toggleTheme = () => {
     setDarkMode((prev) => !prev);
-    // setDarkMode((prev) => {
-    //   const newValue = !prev;
-    //   localStorage.setItem("theme", newValue ? "dark" : "light");
-    //   return newValue;
-    // });
   };
 
   // Apply dark class to HTML element
