@@ -1,11 +1,11 @@
 "use client";
-import Sidebar from "@/components/Sidebar";
-import BigCalendar from "@/components/BigCalendar";
+import Menu from "@/components/menu/Menu";
+import BigCalendar from "@/components/calendar/BigCalendar";
 
 export default function Home() {
   return (
-    <Sidebar>
+    <Menu>
       <BigCalendar />
-    </Sidebar>
+    </Menu>
   );
 }
