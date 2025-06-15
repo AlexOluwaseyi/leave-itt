@@ -1,11 +1,11 @@
 "use client";
-import Sidebar from "@/components/Sidebar";
-import Dashboard from "@/components/Dashboard";
+import AdminDashboard from "@/components/AdminDashboard";
+import Menu from "@/components/menu/Menu";
 
-export default function AdminDashboard() {
+export default function AdminPage() {
   return (
-    <Sidebar>
-      <Dashboard />
-    </Sidebar>
+    <Menu>
+      <AdminDashboard />
+    </Menu>
   );
 }
