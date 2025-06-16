@@ -76,6 +76,9 @@ const injectCalendarStyles = (darkMode: boolean) => {
       .rbc-month-view, .rbc-month-header {
         border-color: #ffffff;
       }
+      .rbc-date-cell.rbc-now {
+        color: #ffffff;
+      }
     `;
   } else {
     style.innerHTML = `
@@ -117,6 +120,9 @@ const injectCalendarStyles = (darkMode: boolean) => {
       }
       .rbc-month-view, .rbc-month-header {
         border-color: #000000;
+      }
+      .rbc-date-cell.rbc-now {
+        color: #ffffff;
       }
     `;
   }
