@@ -1,4 +1,11 @@
+# LEAVE-IT
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+---
+**Production:**
+[![Netlify Status](https://api.netlify.com/api/v1/badges/034ecc4a-733b-4ad6-af54-261edfe61b68/deploy-status)](https://app.netlify.com/projects/leave-it/deploys)
+**Development:**
+[![Netlify Status](https://api.netlify.com/api/v1/badges/034ecc4a-733b-4ad6-af54-261edfe61b68/deploy-status?branch=dev)](https://app.netlify.com/projects/leave-it/deploys)
 
 ## Getting Started
 
