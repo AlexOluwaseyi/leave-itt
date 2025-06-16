@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { Clock } from "lucide-react";
-import { useTheme } from "@/context/ThemeContext";
 
 // Booking Settings Content Component
 export default function BookingSettingsContent() {
   const [bookingEnabled, setBookingEnabled] = useState(true);
-  const { darkMode } = useTheme();
   const [selectedDays, setSelectedDays] = useState([
     "Monday",
     "Tuesday",
@@ -34,41 +31,18 @@ export default function BookingSettingsContent() {
 
   return (
     <div>
-      <h2
-        className={`text-xl font-bold ${
-          darkMode ? "text-gray-200" : "text-gray-900"
-        }`}
-      >
-        Booking Settings
-      </h2>
-      <p className={`${darkMode ? "text-gray-200" : "text-gray-900"} mb-6`}>
-        Configure booking windows and allowed days.
-      </p>
-
       {/* Booking Status Section */}
-      <div
-        className={`border rounded-md p-6 mb-6 ${
-          darkMode ? "border-gray-200 " : "border-gray-900 "
-        }`}
-      >
-        <h3
-          className={`text-lg font-medium mb-4 ${
-            darkMode ? "text-gray-200" : "text-gray-900"
-          }`}
-        >
+      <div className="border rounded-md p-6 mb-6 dark:border-gray-200  border-gray-900 ">
+        <h3 className="text-lg font-medium mb-4 dark:text-gray-200 text-gray-900">
           Booking Status
         </h3>
 
         <div className="flex justify-between items-center">
           <div>
-            <p
-              className={`font-medium ${
-                darkMode ? "text-gray-200" : "text-gray-900"
-              }`}
-            >
+            <p className="font-medium dark:text-gray-200 text-gray-800">
               Booking Availability
             </p>
-            <p className={`text-sm text-gray-500 `}>
+            <p className="text-sm text-gray-500">
               (Toggle booking system on or off for all users)
             </p>
           </div>
@@ -79,45 +53,38 @@ export default function BookingSettingsContent() {
               onChange={() => setBookingEnabled(!bookingEnabled)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-red-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-500 after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600 peer-checked:after:bg-gray-300"></div>
+            <button
+              onClick={() => setBookingEnabled(!bookingEnabled)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                bookingEnabled ? "bg-green-800" : "bg-red-800"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  bookingEnabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+
           </label>
         </div>
       </div>
 
       {/* Booking Window Section */}
-      <div
-        className={`border rounded-md p-6 mb-6 ${
-          darkMode ? "border-gray-200" : "border-gray-900"
-        }`}
-      >
-        <h3
-          className={`text-lg font-medium mb-4 ${
-            darkMode ? "text-gray-200" : "text-gray-900"
-          }`}
-        >
+      <div className="border rounded-md p-6 mb-6 dark:border-gray-200 border-gray-900">
+        <h3 className="text-lg font-medium mb-4 dark:text-gray-200 text-gray-900">
           Booking Window
         </h3>
 
         <div className="grid grid-cols-2 gap-6 mb-4">
           <div>
-            <p
-              className={`font-medium mb-2 ${
-                darkMode ? "text-gray-200" : "text-gray-900"
-              }`}
-            >
+            <p className="font-medium mb-2 dark:text-gray-200 text-gray-900">
               Booking Opens
             </p>
             <div className="relative">
               <input
-                type="text"
-                placeholder="e.g. May 3rd, 2025"
-                // value="May 3rd, 2025 13:39"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10"
-                readOnly
-              />
-              <Clock
-                size={16}
-                className="absolute right-3 top-3 text-gray-400"
+                type="date"
+                className="w-full border dark:border-gray-300 border-gray-800 rounded-md px-3 py-2"
               />
             </div>
             <p className="text-sm text-gray-500 mt-2">
@@ -126,24 +93,15 @@ export default function BookingSettingsContent() {
           </div>
 
           <div>
-            <p
-              className={`font-medium mb-2 ${
-                darkMode ? "text-gray-200" : "text-gray-900"
-              }`}
-            >
+            <p className="font-medium mb-2 dark:text-gray-200 text-gray-800">
               Booking Closes
             </p>
             <div className="relative">
               <input
-                type="text"
-                placeholder="Pick a date"
-                // value=""
-                className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10"
+                type="date"
+                // placeholder="yyyy-mm-dd"
+                className="w-full border dark:border-gray-300 border-gray-800 rounded-md px-3 py-2"
                 // readOnly
-              />
-              <Clock
-                size={16}
-                className="absolute right-3 top-3 text-gray-400"
               />
             </div>
             <p className="text-sm text-gray-500 mt-2">
@@ -154,12 +112,12 @@ export default function BookingSettingsContent() {
       </div>
 
       {/* Allowed Days Section */}
-      <div className="border border-gray-200 rounded-md p-6 mb-6">
+      <div className="border dark:border-gray-300 border-gray-800 rounded-md p-6 mb-6">
         <h3 className="text-lg font-medium mb-4">Allowed Days</h3>
 
         <div>
           <p className="font-medium mb-2">Booking Days</p>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm dark:text-gray-200 text-gray-800 mb-4">
             Select which weekdays are allowed for booking leave
           </p>
 
@@ -175,7 +133,7 @@ export default function BookingSettingsContent() {
                 />
                 <label
                   htmlFor={`day-${day}`}
-                  className="ml-2 text-sm font-medium text-gray-700"
+                  className="ml-2 text-sm font-medium dark:text-gray-200 text-gray-800"
                 >
                   {day}
                 </label>
@@ -183,14 +141,14 @@ export default function BookingSettingsContent() {
             ))}
           </div>
 
-          <p className="text-sm text-gray-600 mt-4">
+          <p className="text-sm dark:text-gray-200 text-gray-800 mt-4">
             If no days are selected, booking will be allowed on all weekdays.
           </p>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button className="px-4 py-2 bg-black text-white rounded-md">
+        <button className="px-4 py-2 bg-green-800 text-white rounded-md">
           Save Settings
         </button>
       </div>
