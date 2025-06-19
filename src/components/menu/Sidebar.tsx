@@ -6,8 +6,8 @@ import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
 import { useSidebarPin } from "@/context/SidebarPinContext";
 import { usePathname } from "next/navigation";
-import { navLinks } from "@/mock"; // Import navLinks from types
-import { mockUser } from "@/mock";
+import { navLinks, mockUser } from "@/mock";
+import { Link } from "next/link";
 
 interface SidebarProps {
   children?: React.ReactNode;
@@ -71,15 +71,17 @@ export default function Sidebar({ children }: SidebarProps) {
         {/* Header */}
         <div className="flex items-center px-4 py-5 border-b border-gray-200 dark:border-gray-700">
           <div className="w-8 h-8 rounded-md flex items-center justify-center">
-            <Image
-              src={
-                darkMode ? "/images/logo-white.png" : "/images/logo-black.png"
-              }
-              alt="Logo"
-              width={32}
-              height={32}
-              className="w-8 h-8"
-            />
+            <Link href="/">
+              <Image
+                src={
+                  darkMode ? "/images/logo-white.png" : "/images/logo-black.png"
+                }
+                alt="Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8"
+              />
+            </Link>
           </div>
           {(!collapsed || pinned) && (
             <h1 className="ml-3 text-xl font-bold">Leave IT</h1>
