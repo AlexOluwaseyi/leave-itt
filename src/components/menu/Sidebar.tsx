@@ -7,7 +7,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useSidebarPin } from "@/context/SidebarPinContext";
 import { usePathname } from "next/navigation";
 import { navLinks, mockUser } from "@/mock";
-import { Link } from "next/link";
+import Link from "next/link";
 
 interface SidebarProps {
   children?: React.ReactNode;
