@@ -64,7 +64,7 @@ export default function Sidebar({ children }: SidebarProps) {
       <div
         className={`${showSidebar ? "translate-x-0" : "-translate-x-full"} ${
           collapsed && !pinned ? "w-16" : "w-64"
-        } fixed h-full bg-white text-gray-800 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 border-r border-gray-200 flex flex-col z-40`}
+        } fixed h-full bg-white text-gray-800 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 border-r border-gray-200 flex flex-col z-50`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
