@@ -84,7 +84,7 @@ export default function Sidebar({ children }: SidebarProps) {
             </Link>
           </div>
           {(!collapsed || pinned) && (
-            <h1 className="ml-3 text-xl font-bold">Leave IT</h1>
+            <h1 className="ml-3 text-xl font-bold">LEAVE IT</h1>
           )}
           <div className="ml-auto flex">
             <button
