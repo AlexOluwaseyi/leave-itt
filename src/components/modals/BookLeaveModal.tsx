@@ -13,8 +13,8 @@ const BookLeaveModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 text-black">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center z-40 text-black">
+      <div className="bg-white dark:bg-gray-900 border-gray-500 rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 ">Add New Event</h2>
         {slotInfo && (
           <p className="mb-4">Selected time: {format(slotInfo.start, "PPP")}</p>
