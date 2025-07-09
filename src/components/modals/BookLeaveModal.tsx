@@ -14,16 +14,22 @@ const BookLeaveModal = ({
 
   return (
     <div className="fixed inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center z-40 text-black">
-      <div className="bg-white dark:bg-gray-900 border-gray-500 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4 ">Add New Event</h2>
+      <div className="bg-gray-100 dark:bg-gray-900 border border-gray-500 rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4 dark:text-gray-200 text-gray-800">
+          Add New Event
+        </h2>
         {slotInfo && (
-          <p className="mb-4">Selected time: {format(slotInfo.start, "PPP")}</p>
+          <p className="mb-4 dark:text-gray-200 text-gray-800">
+            Selected time: {format(slotInfo.start, "PPP")}
+          </p>
         )}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Event Title</label>
+          <label className="block mb-2 dark:text-gray-200 text-gray-800">
+            Event Title
+          </label>
           <input
             type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2 dark:text-gray-200 text-gray-800 placeholder:text-gray-500"
             placeholder="Enter event title"
           />
         </div>
