@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id       String @id @default(uuid())
+  name     String
+  username String @unique
+  password String
+  role     Role   @default(MEMBER)
+  status   Status @default(ACTIVE)
+
+  // Many-to-one relationship with Team
+  // Foreign key teamId
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  // Many-to-one relationship with Manager
+  // Foreign key managerId
+  managerId String
+  manager   Manager @relation(fields: [managerId], references: [id])
+
+  // One-to-many relationship with Booking
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  alias     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One-to-many relationship with Member
+  members Member[]
+
+  // One-to-one relationship with Manager
+  // Foreign key managerId
+  managerId String  @unique
+  manager   Manager @relation(fields: [managerId], references: [id])
+
+  // Bookings Booking[] @relation("TeamBookings")
+  bookings Booking[]
+}
+
+model Manager {
+  id       String @id @default(uuid())
+  name     String
+  username String @unique
+  password String
+  role     Role   @default(MANAGER)
+  status   Status @default(ACTIVE)
+
+  // One-to-one relationship with Team
+  team Team?
+
+  // One-to-many relationship with Member
+  members Member[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id    String  @id @default(uuid())
+  title String?
+  date  String
+
+  // Many-to-one relationship with Member
+  // Foreign key memberId
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  // Many-to-one relationship with Team
+  // Foreign key teamId
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ✅ This enforces: only one booking per team per date
+  @@unique([teamId, date])
+}
+
+model Admin {
+  id       String @id @default(uuid())
+  name     String
+  username String @unique
+  password String
+  role     Role   @default(ADMIN)
+  status   Status @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  MANAGER
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
