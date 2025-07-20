@@ -5,7 +5,6 @@ import { LeaveBooking } from "@/types";
 
 export default function AdminPage() {
   // Mock leave bookings
-  // const [leaveBookings, setLeaveBookings] = useState<LeaveBooking[]>([
   const leaveBookings: LeaveBooking[] = [
     {
       id: "1",

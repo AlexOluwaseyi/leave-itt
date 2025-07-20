@@ -5,7 +5,6 @@ interface SpecialDay {
   maxBookings: number;
 }
 
-// Special Days Content Component
 export default function SpecialDaysContent() {
   const [specialDays] = useState<SpecialDay[]>([]);
 
