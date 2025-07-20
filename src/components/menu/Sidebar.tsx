@@ -6,8 +6,10 @@ import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
 import { useSidebarPin } from "@/context/SidebarPinContext";
 import { usePathname } from "next/navigation";
-import { navLinks, mockUser } from "@/mock";
+import { navLinks } from "@/mock";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   children?: React.ReactNode;
@@ -16,24 +18,24 @@ interface SidebarProps {
 export default function Sidebar({ children }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
-  const [user, setUser] = useState(mockUser);
   const { darkMode } = useTheme();
   const { pinned, togglePin } = useSidebarPin();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   // Toggle user login status (for demonstration)
-  const toggleLogin = () => {
-    setUser((prev) => ({
-      ...prev,
-      loggedIn: !prev.loggedIn,
-    }));
+  const handleLogin = () => {
+    if (session) {
+      signOut({ redirect: false });
+    } else {
+      window.location.href = "/auth/signin";
+    }
   };
 
   // Update togglePin to use context
   const handleTogglePin = () => {
     togglePin();
     if (!pinned) {
-      // This will be the old value since toggle happens after
       setCollapsed(false);
       setShowSidebar(true);
     }
@@ -57,6 +59,14 @@ export default function Sidebar({ children }: SidebarProps) {
   const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  if (status === "loading") {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex min-h-screen`}>
@@ -144,7 +154,7 @@ export default function Sidebar({ children }: SidebarProps) {
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-4">
           {/* User info when logged in */}
-          {user.loggedIn && (
+          {session && (
             <div
               className={`flex items-center mb-4 ${
                 collapsed && !pinned ? "justify-center" : ""
@@ -163,9 +173,9 @@ export default function Sidebar({ children }: SidebarProps) {
               />
               {(!collapsed || pinned) && (
                 <div className="ml-3">
-                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-sm font-medium">{session.user.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    User
+                    {session.user.role}
                   </p>
                 </div>
               )}
@@ -188,13 +198,13 @@ export default function Sidebar({ children }: SidebarProps) {
             />
 
             <button
-              onClick={toggleLogin}
+              onClick={handleLogin}
               className={`flex items-center p-2 rounded-md dark:text-gray-200 dark:hover:bg-gray-200 dark:hover:text-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white ${
                 collapsed && !pinned ? "" : "space-x-2"
               }`}
-              title={user.loggedIn ? "Log out" : "Log in"}
+              title={session?.user ? "Log out" : "Log in"}
             >
-              {user.loggedIn ? (
+              {session ? (
                 <>
                   <LogOut size={20} />
                   {(!collapsed || pinned) && <span>Logout</span>}
