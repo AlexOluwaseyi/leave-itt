@@ -157,7 +157,7 @@ const BigCalendar = () => {
   }, [darkMode]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full mx-auto min-h-[calc(100vh-138px)] md:h-screen md:my-0 dark:bg-gray-900 dark:text-white bg-white text-gray-900">
+    <div className="flex flex-col items-center justify-center w-full mx-auto min-h-[calc(100vh-138px)] md:h-screen md:my-0 dark:bg-gray-900 dark:text-white bg-white text-gray-900 mt-16 md:mt-0">
       <div className="w-full max-w-3xl p-4  rounded dark:bg-gray-900 dark:text-white bg-white text-gray-900">
         <Calendar
           key={currentDate.toISOString()}
