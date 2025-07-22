@@ -3,24 +3,57 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast, Toaster } from "react-hot-toast";
+
+// Import signIn and signOut functions from auth library
 import { signIn } from "next-auth/react";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const credentialsAction = (formData: FormData) => {
-    const username = formData.get("username")?.toString().toLowerCase();
-    const password = formData.get("password")?.toString();
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    signIn("credentials", {
-      redirect: true,
-      username,
-      password,
-      redirectTo: "/dashboard",
-    });
+    if (!username || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-    toast.success("Login successful");
+    console.log("Logging in with:", { username, password });
+
+    try {
+      const res = await signIn("credentials", {
+        redirect: true,
+        username,
+        password,
+        redirectTo: "/dashboard", // Redirect to dashboard after login);
+      });
+
+      console.log("SignIn response:", res);
+
+      if (res?.error) {
+        // Handle different error types
+        switch (res.error) {
+          case "CredentialsSignin":
+            toast.error("Invalid username or password");
+            break;
+          case "AccessDenied":
+            toast.error("Access denied");
+            break;
+          default:
+            toast.error("Login failed. Please try again.");
+        }
+      } else if (res?.ok) {
+        toast.success("Login successful");
+        // Redirect to dashboard or intended page
+        // router.push("/dashboard");
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An unexpected error occurred");
+    }
   };
 
   return (
@@ -36,7 +69,7 @@ export default function Login() {
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
           Welcome Back!
         </h2>
-        <form action={credentialsAction} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
