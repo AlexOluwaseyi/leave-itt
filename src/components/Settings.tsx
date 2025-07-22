@@ -3,7 +3,6 @@ import TabButton from "@/components/ui/TabButton";
 import SpecialDaysContent from "@/components/SpecialDaysContent";
 import BookingSettingsContent from "@/components/BookingSettingsContent";
 
-// Main Layout Component
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("bookingSettings");
 

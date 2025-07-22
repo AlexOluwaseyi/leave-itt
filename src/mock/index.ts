@@ -8,10 +8,16 @@ export const navLinks = [
     { icon: Settings, text: "Settings", href: "/settings" },
 ];
 
-export const mockUser = {
-    name: "John Doe",
-    role: "admin",
-    loggedIn: true,
+export const user = {
+    id: "1",
+    username: "admin001",
+    name: "Test User",
+    role: "MEMBER",
+    status: "ACTIVE",
+    password:
+        "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+    teamId: "team123",
+    managerId: "manager123",
 };
 
 export const teamMembers = [

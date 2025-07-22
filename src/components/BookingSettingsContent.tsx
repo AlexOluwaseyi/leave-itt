@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// Booking Settings Content Component
 export default function BookingSettingsContent() {
   const [bookingEnabled, setBookingEnabled] = useState(true);
   const [selectedDays, setSelectedDays] = useState([
@@ -99,9 +98,7 @@ export default function BookingSettingsContent() {
             <div className="relative">
               <input
                 type="date"
-                // placeholder="yyyy-mm-dd"
                 className="w-full border dark:border-gray-300 border-gray-800 rounded-md px-3 py-2"
-                // readOnly
               />
             </div>
             <p className="text-sm text-gray-500 mt-2">

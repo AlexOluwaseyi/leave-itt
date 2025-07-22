@@ -9,8 +9,6 @@ import TabButton from "@/components/ui/TabButton";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  //   const [globalLeaveBookingEnabled, setGlobalLeaveBookingEnabled] =
-  //     useState(true);
 
   // Mock data - in real app, this would come from API
   // eslint-disable-next-line

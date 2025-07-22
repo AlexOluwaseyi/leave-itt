@@ -27,11 +27,23 @@ export interface DashboardStats {
   remainingLeaveDays: number;
 }
 
-export interface UserData {
+export type UserData = {
+  id: string;
+  username: string;
   name: string;
-  email: string;
   password: string;
-  isAdmin: boolean;
+  status: "ACTIVE" | "INACTIVE";
+  createdAt?: Date;
+  updatedAt?: Date;
+} & {
+  role: "MEMBER";
+  teamId: string;
+  managerId?: string;
+} | {
+  role: "MANAGER";
+  teamId?: string;
+} | {
+  role: "ADMIN";
 }
 
 export interface AddTeamMemberModalProps {
