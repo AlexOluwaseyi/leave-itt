@@ -19,17 +19,12 @@ export default function Login() {
       return;
     }
 
-    console.log("Logging in with:", { username, password });
-
     try {
       const res = await signIn("credentials", {
-        redirect: true,
+        redirect: false,
         username,
         password,
-        redirectTo: "/dashboard", // Redirect to dashboard after login);
       });
-
-      console.log("SignIn response:", res);
 
       if (res?.error) {
         // Handle different error types
@@ -44,11 +39,8 @@ export default function Login() {
             toast.error("Login failed. Please try again.");
         }
       } else if (res?.ok) {
-        toast.success("Login successful");
-        // Redirect to dashboard or intended page
-        // router.push("/dashboard");
-      } else {
-        toast.error("An unexpected error occurred");
+        // Successful login, redirect manually
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.error("Login error:", error);
