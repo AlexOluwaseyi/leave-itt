@@ -4,165 +4,150 @@ import NextAuth from "next-auth"
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { user } from '@/mock';
-// import prisma from '@/lib/prisma'; 
-// import Credentials from 'next-auth/providers/credentials';
 
 declare module "next-auth" {
-    interface User {
-        id: string;
-        username: string;
-        name: string;
-        role: string;
-        status: string;
-        teamId?: string;
-        teamAlias?: string;
-        managerId?: string;
-        isManager?: boolean;
-        isAdmin?: boolean;
-        permissions?: string[];
-    }
+  interface User {
+    id: string;
+    username: string;
+    name: string;
+    status: "ACTIVE" | "INACTIVE";
+    role: "MEMBER" | "MANAGER" | "ADMIN";
+    teamId?: string;
+    managerId?: string;
+  }
 
-    interface Session {
-        user: {
-            id: string;
-            username: string;
-            name: string;
-            role: string;
-            status: string;
-            teamId?: string;
-            teamAlias?: string;
-            managerId?: string;
-            isManager?: boolean;
-            permissions?: string[];
-        };
-    }
+  interface Session {
+    user: {
+      id: string;
+      username: string;
+      name: string;
+      status: "ACTIVE" | "INACTIVE";
+      role: "MEMBER" | "MANAGER" | "ADMIN";
+      teamId?: string;
+      managerId?: string;
+    };
+  }
 
-    interface JWT {
-        id: string;
-        name?: string;
-        email?: string;
-        role?: string;
-        status?: string;
-        username?: string;
-        teamId?: string;
-        teamAlias?: string;
-        managerId?: string;
-        isManager?: boolean;
-        permissions?: string[];
-    }
+  interface JWT {
+    id: string;
+    username: string;
+    name: string;
+    status: "ACTIVE" | "INACTIVE";
+    role: "MEMBER" | "MANAGER" | "ADMIN";
+    teamId?: string;
+    managerId?: string;
+  }
 }
 
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-    debug: true,
-    providers: [
-        CredentialsProvider({
-            name: 'credentials',
-            credentials: {
-                username: { label: 'Username', type: 'text' },
-                password: { label: 'Password', type: 'password' },
-            },
-            async authorize(credentials) {
-                if (!credentials?.username || !credentials?.password) {
-                    throw new Error('Invalid credentials');
-                }
+  providers: [
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        username: { label: 'Username', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        try {
+          if (!credentials?.username || !credentials?.password) {
+            return null
+          }
 
-                // const [member, manager, admin] = await Promise.all([
-                //     prisma.member.findUnique({ where: { username: credentials.username } }),
-                //     prisma.manager.findUnique({ where: { username: credentials.username } }),
-                //     prisma.admin.findUnique({ where: { username: credentials.username } }),
-                // ]);
+          if (credentials.username !== user.username) {
+            return null;
+          }
 
-                // const user = member || manager || admin;
+          const isPasswordValid = await bcrypt.compare(credentials.password as string, user.password);
 
-                // if (!user) {
-                //     throw new Error('User not found');
-                // }
+          if (!isPasswordValid) {
+            return null;
+          }
 
-                if (credentials.username !== user.username) {
-                    throw new Error('User not found.');
-                }
+          return {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            role: user.role as "ADMIN" | "MANAGER" | "MEMBER",
+            status: user.status as "ACTIVE" | "INACTIVE",
+            teamId: user.teamId,
+            managerId: user.managerId,
+          };
+        } catch (error: any) { // eslint-disable-line
+          console.error('Error during authorization:', error);
+          throw new Error("Authorization failed");
+        }
+      },
+    }),
+  ],
 
-                const isPasswordValid = await bcrypt.compare(credentials.password as string, user.password);
+  session: {
+    strategy: "jwt",
+    maxAge: 5 * 60, // 5 minutes
+    // maxAge: 24 * 60 * 60, // 1 days
+  },
 
-                if (!isPasswordValid) {
-                    throw new Error('Username or password is incorrect.');
-                }
+  jwt: {
+    maxAge: 5 * 60, // 5 minutes
+    // maxAge: 24 * 60 * 60, // 1 days
+  },
 
-                return {
-                    id: user.id,
-                    username: user.username,
-                    name: user.name,
-                    role: user.role,
-                    status: user.status,
-                };
-            },
-        }),
-    ],
+  callbacks: {
 
-    session: {
-        strategy: "jwt",
-        maxAge: 5 * 60, // 5 minutes
-        // maxAge: 24 * 60 * 60, // 1 days
+
+    async jwt({ token, user }) {
+      try {
+        if (user) {
+          token.role = user.role;
+          token.status = user.status;
+          token.id = user.id;
+          token.username = user.username;
+        }
+        return token;
+
+      } catch (error) {
+        console.error('Error in JWT callback:', error);
+        throw new Error("Token processing error");
+      }
     },
-    jwt: {
-        maxAge: 5 * 60, // 5 minutes
-        // maxAge: 24 * 60 * 60, // 1 days
+
+    async session({ session, token }) {
+      try {
+        if (session.user) {
+          session.user.id = token.id as string;
+          session.user.name = token.name as string;
+          session.user.role = token.role as "MEMBER" | "MANAGER" | "ADMIN";
+          session.user.status = token.status as "ACTIVE" | "INACTIVE";
+          session.user.username = token.username as string;
+          session.user.teamId = token.teamId as string;
+          session.user.managerId = token.managerId as string;
+        }
+        return session
+      } catch (error) {
+        console.error('Error in session callback:', error);
+        throw new Error("Session processing error");
+      }
     },
-    callbacks: {
-        authorized({ auth, request: { nextUrl } }) {
 
-            console.log("Auth:", auth);
+    async signIn({ user }) {
+      // Block inactive users
+      if (user.status === "INACTIVE") {
+        throw new Error("Account is inactive. Contact administrator.");
+      }
 
-            const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-            if (isOnDashboard) {
-                if (isLoggedIn) return true;
-                return false; // Redirect unauthenticated users to login page
-            } else if (isLoggedIn) {
-                return Response.redirect(new URL('/dashboard', nextUrl));
-            }
-            return true;
-        },
-
-        async jwt({ token, user }) {
-            if (user) {
-                token.role = user.role;
-                token.status = user.status;
-                token.id = user.id;
-                token.username = user.username;
-            }
-
-            return token;
-        },
-        async session({ session, token }) {
-            if (session.user) {
-                session.user.id = token.id as string;
-                session.user.name = token.name as string;
-                session.user.role = token.role as string;
-                session.user.status = token.status as string;
-                session.user.username = token.username as string;
-            }
-            return session;
-        },
-        async signIn({ user }) {
-            // Block inactive users
-            if (user.status === "INACTIVE") {
-                throw new Error("Account is inactive. Contact administrator.");
-            }
-
-            return true;
-        },
-        async redirect({ url, baseUrl }) {
-            // Redirect to dashboard after sign in
-            if (url.startsWith("/")) return `${baseUrl}${url}`;
-            if (new URL(url).origin === baseUrl) return url;
-            return `${baseUrl}/dashboard`;
-        },
+      return true;
     },
-    pages: {
-        signIn: "/auth/signin",
-        signOut: "/auth/signout",
-        error: "/auth/error",
-    }
+    async redirect({ url, baseUrl }) {
+      // Redirect to dashboard after sign in
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/dashboard`;
+    },
+  },
+  pages: {
+    signIn: "/auth/signin",
+    signOut: "/auth/signout",
+    error: "/auth/error",
+  },
+  debug: process.env.NODE_ENV === "production",
 } satisfies NextAuthConfig);
