@@ -22,45 +22,69 @@ export const user = {
 
 export const teamMembers = [
     {
-        id: 1,
+        id: "1",
         name: "John Doe",
-        email: "john@example.com",
+        username: "john@example.com",
         role: "ADMIN",
         status: "ACTIVE",
+        password:
+            "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+        teamId: "team123",
+        managerId: "manager123",
     },
     {
-        id: 2,
+        id: "2",
         name: "Jane Smith",
-        email: "jane@example.com",
+        username: "jane@example.com",
         role: "USER",
         status: "ACTIVE",
+        password:
+            "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+        teamId: "team123",
+        managerId: "manager123",
     },
     {
-        id: 3,
+        id: "3",
         name: "Jane Smith",
-        email: "jane@example.com",
+        username: "jane@example.com",
         role: "USER",
         status: "ACTIVE",
+        password:
+            "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+        teamId: "team123",
+        managerId: "manager123",
     },
     {
-        id: 5,
+        id: "4",
         name: "Jane Smith",
-        email: "jane@example.com",
+        username: "jane@example.com",
         role: "USER",
         status: "ACTIVE",
+        password:
+            "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+        teamId: "team123",
+        managerId: "manager123",
     },
     {
-        id: 4,
+        id: "5",
         name: "Bob Wilson",
-        email: "bob@example.com",
+        username: "bob@example.com",
         role: "USER",
         status: "SUSPENDED",
+        password:
+            "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+        teamId: "team123",
+        managerId: "manager123",
     },
     {
-        id: 6,
+        id: "6",
         name: "Bob Wilson",
-        email: "bob@example.com",
+        username: "bob@example.com",
         role: "ADMIN",
         status: "SUSPENDED",
+        password:
+            "$2b$10$pfz0U9cIzMdSGYcZpFMX2uJsYgGr91NliMwJuCqOWCMAeY0juMTmu", // hashed password for "password123"
+        teamId: "team123",
+        managerId: "manager123",
     },
 ];

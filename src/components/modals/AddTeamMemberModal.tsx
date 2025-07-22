@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { X } from "lucide-react";
-import { UserData } from "@/types";
+import { TeamMember } from "@/types";
 import { AddTeamMemberModalProps } from "@/types";
 
 export function AddTeamMemberModal({
@@ -10,19 +10,23 @@ export function AddTeamMemberModal({
   onAddUser,
 }: AddTeamMemberModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<UserData>({
+  const [formData, setFormData] = useState<TeamMember>({
+    id: "",
     name: "",
-    email: "",
+    username: "",
     password: "",
-    isAdmin: false,
+    role: "MEMBER",
+    status: "ACTIVE",
+    teamId: "",
+    managerId: "",
   });
 
   if (!isOpen) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
@@ -33,7 +37,7 @@ export function AddTeamMemberModal({
 
     try {
       // Validate form
-      if (!formData.name || !formData.email || !formData.password) {
+      if (!formData.name || !formData.username || !formData.password) {
         alert("Please fill in all required fields");
         return;
       }
@@ -42,7 +46,16 @@ export function AddTeamMemberModal({
       onAddUser?.(formData);
 
       // Reset form and close modal
-      setFormData({ name: "", email: "", password: "", isAdmin: false });
+      setFormData({
+        id: "",
+        name: "",
+        username: "",
+        password: "",
+        role: "MEMBER",
+        status: "ACTIVE",
+        teamId: "",
+        managerId: "",
+      });
       onClose();
     } catch (error) {
       console.error("Error adding user:", error);
@@ -114,7 +127,7 @@ export function AddTeamMemberModal({
             <input
               type="email"
               name="email"
-              value={formData.email}
+              value={formData.username}
               onChange={handleInputChange}
               required
               className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
@@ -143,16 +156,28 @@ export function AddTeamMemberModal({
           </div>
 
           <div className="flex items-center">
-            <input
+            {/* <input
               type="checkbox"
-              name="isAdmin"
-              checked={formData.isAdmin}
+              name="role"
+              checked={formData.role === "ADMIN"}
               onChange={handleInputChange}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
               Admin Access
-            </label>
+            </label> */}
+            <select
+              name="role"
+              value={formData.role}
+              // onChange={handleInputChange}
+              className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+              focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="ADMIN">Admin</option>
+              <option value="MANAGER">Manager</option>
+              <option value="MEMBER">Member</option>
+            </select>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">

@@ -4,7 +4,7 @@ import {
   AddTeamMemberModal,
   BulkImportUsersModal,
 } from "./modals/AddTeamMemberModal";
-import { UserData } from "@/types";
+import { TeamMember } from "@/types";
 import { teamMembers } from "@/mock";
 
 export default function TeamMembersContent() {
@@ -12,14 +12,19 @@ export default function TeamMembersContent() {
   const [isBulkImportDialogOpen, setIsBulkImportDialogOpen] = useState(false);
   const [users, setUsers] = useState(teamMembers);
 
-  const handleAddUser = (userData: UserData) => {
+  const handleAddUser = (userData: TeamMember) => {
     console.log("Current length of users:", users.length);
     const newUser = {
-      id: Date.now() + Math.random(), // Unique ID based on timestamp and random number
+      id: "" + Date.now() + Math.random(), // Unique ID based on timestamp and random number
       name: userData.name,
-      email: userData.email,
-      role: userData.isAdmin ? "ADMIN" : "USER",
-      status: "ACTIVE",
+      username: userData.username,
+      role: userData.role,
+      status: userData.status,
+      password: userData.password,
+      teamId: userData.teamId || "",
+      managerId: userData.managerId || "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     setUsers((prevUsers) => [...prevUsers, newUser]);
@@ -30,13 +35,16 @@ export default function TeamMembersContent() {
     // Process CSV data here
     console.log("CSV data for import:", csvData);
     csvData.split("\n").forEach((line) => {
-      const [name, email, password, role] = line.split(",");
-      if (name && email && password && role) {
+      const [name, username, password, role, status, teamId] = line.split(",");
+      if (name && username && password && role && status && teamId) {
         handleAddUser({
+          id: "" + Date.now() + Math.random(),
+          status: status.trim().toUpperCase() as "ACTIVE" | "INACTIVE",
           name: name.trim(),
-          email: email.trim(),
+          username: username.trim(),
           password: password.trim(),
-          isAdmin: role.trim().toUpperCase() === "ADMIN",
+          role: role.trim().toUpperCase() as "ADMIN" | "MANAGER" | "MEMBER",
+          teamId: teamId.trim(),
         });
       }
     });
@@ -45,7 +53,7 @@ export default function TeamMembersContent() {
   };
 
   const handleToggleUserStatus = async (
-    userId: number,
+    userId: string,
     currentStatus: string
   ) => {
     const updatedUsers = users.map((user) => {
@@ -147,7 +155,7 @@ export default function TeamMembersContent() {
                     {user.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium dark:text-gray-100 text-gray-900">
-                    {user.email}
+                    {user.username}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span

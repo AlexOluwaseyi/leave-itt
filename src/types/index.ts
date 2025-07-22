@@ -27,27 +27,41 @@ export interface DashboardStats {
   remainingLeaveDays: number;
 }
 
-export type UserData = {
+// export type UserData = {
+//   id: string;
+//   username: string;
+//   name: string;
+//   password: string;
+//   status: "ACTIVE" | "INACTIVE";
+//   createdAt?: Date;
+//   updatedAt?: Date;
+// } & {
+//   role: "MEMBER";
+//   teamId: string;
+//   managerId: string;
+// } | {
+//   role: "MANAGER";
+//   teamId: string;
+// } | {
+//   role: "ADMIN";
+// }
+
+export type TeamMember = {
   id: string;
-  username: string;
   name: string;
-  password: string;
+  username: string;
+  role: "ADMIN" | "MANAGER" | "MEMBER";
   status: "ACTIVE" | "INACTIVE";
-  createdAt?: Date;
-  updatedAt?: Date;
-} & {
-  role: "MEMBER";
-  teamId: string;
-  managerId?: string;
-} | {
-  role: "MANAGER";
+  password: string;
   teamId?: string;
-} | {
-  role: "ADMIN";
-}
+  managerId?: string;
+} & Partial<{
+  createdAt: Date;
+  updatedAt: Date;
+}>;
 
 export interface AddTeamMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddUser?: (userData: UserData) => void;
+  onAddUser?: (userData: TeamMember) => void;
 }
