@@ -4,6 +4,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { user } from '@/mock';
+// import prisma from '@/lib/prisma';
 
 declare module "next-auth" {
   interface User {
@@ -53,6 +54,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!credentials?.username || !credentials?.password) {
             return null
           }
+
+          // Fetch user from database
+          // const user = await prisma.user.findUnique({
+          //   where: { username: credentials.username },
+          // });
+
+          // if (!user) {
+          //   return null;
+          // }
 
           if (credentials.username !== user.username) {
             return null;
