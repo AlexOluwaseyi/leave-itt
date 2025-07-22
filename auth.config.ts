@@ -93,8 +93,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   callbacks: {
-
-
     async jwt({ token, user }) {
       try {
         if (user) {
