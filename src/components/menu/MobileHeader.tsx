@@ -17,7 +17,7 @@ export default function MobileHeader() {
   // Toggle user login status (for demonstration)
   const handleLogin = () => {
     if (session) {
-      signOut({ redirect: false });
+      signOut({ redirect: true, redirectTo: "/auth/signin" });
     } else {
       window.location.href = "/auth/signin";
     }
@@ -66,8 +66,7 @@ export default function MobileHeader() {
           )}
           <ThemeSwitcher />
           {session ? (
-
-          <div
+            <div
               className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => setShowPopover((prev) => !prev)}
             >

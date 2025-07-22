@@ -26,7 +26,7 @@ export default function Sidebar({ children }: SidebarProps) {
   // Toggle user login status (for demonstration)
   const handleLogin = () => {
     if (session) {
-      signOut({ redirect: false });
+      signOut({ redirect: true, redirectTo: "/auth/signin" });
     } else {
       window.location.href = "/auth/signin";
     }
