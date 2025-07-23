@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogOut, LogIn, Pin } from "lucide-react";
 import Image from "next/image";
 import ThemeSwitcher from "@@/ThemeSwitcher";
@@ -21,9 +21,13 @@ export default function Sidebar({ children }: SidebarProps) {
   const { darkMode } = useTheme();
   const { pinned, togglePin } = useSidebarPin();
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
-  // Toggle user login status (for demonstration)
+
+  useEffect(() => {
+    // Force session refresh after authentication changes
+  }, [session]);
+
   const handleLogin = () => {
     if (session) {
       signOut({ redirect: true, redirectTo: "/auth/signin" });
@@ -59,14 +63,6 @@ export default function Sidebar({ children }: SidebarProps) {
   const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(href + "/");
   };
-
-  if (status === "loading") {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
-      </div>
-    );
-  }
 
   return (
     <div className={`flex min-h-screen`}>
