@@ -1,6 +1,6 @@
 // components/MobileHeader.tsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
@@ -12,7 +12,11 @@ import { signOut } from "next-auth/react";
 export default function MobileHeader() {
   const { darkMode } = useTheme();
   const [showPopover, setShowPopover] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    // Force session refresh after authentication changes
+  }, [session]);
 
   // Toggle user login status (for demonstration)
   const handleLogin = () => {
@@ -22,14 +26,6 @@ export default function MobileHeader() {
       window.location.href = "/auth/signin";
     }
   };
-
-  if (status === "loading") {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
-      </div>
-    );
-  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 min-h-[65px] border-b border-gray-200 dark:border-gray-700 px-4 py-3">

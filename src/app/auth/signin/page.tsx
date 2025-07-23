@@ -22,8 +22,8 @@ export default function Login() {
     try {
       const res = await signIn("credentials", {
         redirect: false,
-        username,
-        password,
+        username: username.trim().toLowerCase(),
+        password: password.trim(),
       });
 
       if (res?.error) {
