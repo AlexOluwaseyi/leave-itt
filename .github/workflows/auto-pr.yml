@@ -1,0 +1,39 @@
+name: Auto PR on STABLE Commits
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  auto-pr:
+    if: contains(github.event.head_commit.message, 'STABLE:')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract Target Branch from Commit Message
+        id: extract
+        run: |
+          echo "Commit message: ${{ github.event.head_commit.message }}"
+          BRANCH=$(echo "${{ github.event.head_commit.message }}" | sed -n 's/.*\[pr-to:\(.*\)\].*/\1/p')
+          echo "TARGET_BRANCH=$BRANCH" >> $GITHUB_ENV
+      - name: Check if target branch was found
+        run: |
+          if [ -z "$TARGET_BRANCH" ]; then
+            echo "❌ No [pr-to:<branch>] tag found in commit message."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ github.ref_name }}
+          destination_branch: ${{ env.TARGET_BRANCH }}
+          pr_title: "🔁 STABLE PR: ${{ github.ref_name }} → ${{ env.TARGET_BRANCH }}"
+          pr_body: |
+            📦 Commit message:
+            ```
+            ${{ github.event.head_commit.message }}
+            ```
