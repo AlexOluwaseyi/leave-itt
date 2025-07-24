@@ -3,7 +3,7 @@ name: Auto PR on STABLE Commits
 on:
   push:
     branches:
-      - '**'
+      - "**"
 
 permissions:
   contents: write
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   auto-pr:
-    if: contains(github.event.head_commit.message, 'STABLE') || contains(github.event.head_commit.message, 'pr-to')
+    if: contains(github.event.head_commit.message, 'STABLE') && contains(github.event.head_commit.message, 'pr-to')
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,6 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v4
-
       - name: Check token permissions
         run: |
           curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit
