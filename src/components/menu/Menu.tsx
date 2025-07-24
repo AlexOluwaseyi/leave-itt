@@ -1,4 +1,5 @@
 // "use client";
+import { useEffect } from "react";
 import { useResponsive } from "@/hooks/useResponsive";
 import MobileHeader from "@@/menu/MobileHeader";
 import MobileFooterNav from "@@/menu/MobileFooterNav";
@@ -12,7 +13,11 @@ interface MenuProps {
 
 export default function Menu({ children }: MenuProps) {
   const { mobileView, desktopView, isLoaded } = useResponsive();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    // Force session refresh after authentication changes
+  }, [session]);
 
   if (!isLoaded || status === "loading") {
     return <Loading />;

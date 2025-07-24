@@ -1,6 +1,6 @@
 // components/MobileHeader.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
@@ -13,10 +13,6 @@ export default function MobileHeader() {
   const { darkMode } = useTheme();
   const [showPopover, setShowPopover] = useState(false);
   const { data: session } = useSession();
-
-  useEffect(() => {
-    // Force session refresh after authentication changes
-  }, [session]);
 
   // Toggle user login status (for demonstration)
   const handleLogin = () => {

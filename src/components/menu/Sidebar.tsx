@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LogOut, LogIn, Pin } from "lucide-react";
 import Image from "next/image";
 import ThemeSwitcher from "@@/ThemeSwitcher";
@@ -22,11 +22,6 @@ export default function Sidebar({ children }: SidebarProps) {
   const { pinned, togglePin } = useSidebarPin();
   const pathname = usePathname();
   const { data: session } = useSession();
-
-
-  useEffect(() => {
-    // Force session refresh after authentication changes
-  }, [session]);
 
   const handleLogin = () => {
     if (session) {
