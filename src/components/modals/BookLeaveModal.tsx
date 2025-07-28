@@ -13,7 +13,7 @@ const BookLeaveModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center z-40 text-black">
+    <div className="fixed min-h-full inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center z-40 text-black">
       <div className="bg-gray-100 dark:bg-gray-900 border border-gray-500 rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 dark:text-gray-200 text-gray-800">
           Add New Event

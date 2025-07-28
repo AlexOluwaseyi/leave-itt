@@ -1,33 +1,35 @@
 "use client";
 import { useState } from "react";
 import { X } from "lucide-react";
-import { TeamMember } from "@/types";
-import { AddTeamMemberModalProps } from "@/types";
+import { Users } from "@/types";
+import { toast, Toaster } from "react-hot-toast";
 
-export function AddTeamMemberModal({
+export function AddUserModal({
   isOpen,
-  onClose,
-  onAddUser,
-}: AddTeamMemberModalProps) {
+  onCloseAction,
+}: {
+  isOpen: boolean;
+  onCloseAction: () => void;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<TeamMember>({
+  const [formData, setFormData] = useState<Users>({
     id: "",
     name: "",
     username: "",
     password: "",
     role: "MEMBER",
     status: "ACTIVE",
-    teamId: "",
-    managerId: "",
   });
 
   if (!isOpen) return null;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
@@ -42,8 +44,19 @@ export function AddTeamMemberModal({
         return;
       }
 
-      // Call parent handler
-      onAddUser?.(formData);
+      const res = await fetch("/api/v1/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData }),
+      });
+
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || "Failed to add user");
+      }
+
+      const newUser = await res.json();
+      toast.success(`User added: ${newUser.name}`);
 
       // Reset form and close modal
       setFormData({
@@ -56,9 +69,10 @@ export function AddTeamMemberModal({
         teamId: "",
         managerId: "",
       });
-      onClose();
+      onCloseAction();
     } catch (error) {
       console.error("Error adding user:", error);
+      toast.error("Failed to add user.");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,8 +80,8 @@ export function AddTeamMemberModal({
 
   return (
     <div
-      className="fixed inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center p-4"
-      onClick={onClose}
+      className="fixed inset-0 min-h-full dark:bg-black bg-white bg-opacity-50 flex items-center justify-center p-4"
+      onClick={onCloseAction}
     >
       <div
         className="bg-white dark:bg-gray-900 border border-gray-500 rounded-lg max-w-md w-full p-6"
@@ -93,7 +107,7 @@ export function AddTeamMemberModal({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={onCloseAction}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             aria-label="Close modal"
           >
@@ -122,11 +136,11 @@ export function AddTeamMemberModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Email *
+              Username *
             </label>
             <input
-              type="email"
-              name="email"
+              type="username"
+              name="username"
               value={formData.username}
               onChange={handleInputChange}
               required
@@ -156,34 +170,24 @@ export function AddTeamMemberModal({
           </div>
 
           <div className="flex items-center">
-            {/* <input
-              type="checkbox"
-              name="role"
-              checked={formData.role === "ADMIN"}
-              onChange={handleInputChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-              Admin Access
-            </label> */}
             <select
               name="role"
               value={formData.role}
-              // onChange={handleInputChange}
+              onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
               focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="ADMIN">Admin</option>
-              <option value="MANAGER">Manager</option>
               <option value="MEMBER">Member</option>
+              <option value="MANAGER">Manager</option>
+              <option value="ADMIN">Admin</option>
             </select>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium 
               text-white bg-red-800 hover:bg-red-900"
             >
@@ -202,18 +206,17 @@ export function AddTeamMemberModal({
           </div>
         </form>
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }
 
 export function BulkImportUsersModal({
   isOpen,
-  onClose,
-  onImport,
+  onCloseAction,
 }: {
   isOpen: boolean;
-  onClose: () => void;
-  onImport?: (csvData: string) => void;
+  onCloseAction: () => void;
 }) {
   const [csvContent, setCsvContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -223,11 +226,49 @@ export function BulkImportUsersModal({
   const handleBulkImport = async () => {
     setIsSubmitting(true);
     try {
-      onImport?.(csvContent);
+      // Parse CSV content and import users
+      const users = csvContent
+        .trim()
+        .split("\n")
+        .map((line) => {
+          const [name, email, password, role] = line
+            .split(",")
+            .map((item) => item.trim());
+          return { name, username: email, password, role: role || "MEMBER" };
+        })
+        .filter((user) => user.name && user.username && user.password);
+
+      if (users.length === 0) {
+        alert("Please provide valid CSV content");
+        return;
+      }
+
+      const res = await fetch("/api/v1/users", {
+        method: "POST",
+        headers: { "Content-Type": "text/csv" },
+        body: JSON.stringify({
+          users: users.map((user) => ({
+            ...user,
+            role: "MEMBER",
+            status: "ACTIVE",
+            teamId: "",
+            managerId: "",
+          })),
+        }),
+      });
+
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || "Failed to import users");
+      }
+
+      const result = await res.json();
+      toast.success(`Users imported: ${result.length} users`);
       setCsvContent("");
-      onClose();
+      onCloseAction();
     } catch (error) {
       console.error("Error importing users:", error);
+      toast.error("Failed to import users.");
     } finally {
       setIsSubmitting(false);
     }
@@ -236,7 +277,7 @@ export function BulkImportUsersModal({
   return (
     <div
       className="fixed inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center p-4"
-      //   onClick={onClose}
+      //   onClick={onCloseAction}
     >
       <div className="bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-500 max-w-md w-full p-6">
         <div className="mb-4">
@@ -277,7 +318,7 @@ export function BulkImportUsersModal({
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-4 py-2 rounded-md text-sm font-medium text-white
               bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -293,6 +334,7 @@ export function BulkImportUsersModal({
           </div>
         </div>
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }
