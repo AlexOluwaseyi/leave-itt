@@ -24,13 +24,13 @@ model User {
 
   // (1) Managerial Relationships
   managerId      String?
-  manager        User?   @relation("ManagerMembers", fields: [managerId], references: [id])
+  manager        User?   @relation("ManagerMembers", fields: [managerId], references: [id], onDelete: SetNull)
   managedMembers User[]  @relation("ManagerMembers")
 
   // (2) Team Relationships
-  teamId String
-  team   Team   @relation("TeamMembers", fields: [teamId], references: [id])
-  managedTeams Team[] @relation("TeamManager")
+  teamId       String?
+  team         Team?   @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  managedTeams Team[]  @relation("TeamManager")
 
   // (3) Bookings
   bookings Booking[] // One-to-many: user can have multiple bookings ✅
@@ -50,7 +50,7 @@ model Team {
 
   // (2) Managerial Relationships
   managerId String?
-  manager   User? @relation("TeamManager", fields: [managerId], references: [id])
+  manager   User?   @relation("TeamManager", fields: [managerId], references: [id], onDelete: SetNull)
 
   // Bookings Booking[] @relation("TeamBookings")
   bookings Booking[]
