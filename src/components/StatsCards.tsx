@@ -21,14 +21,14 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       textColor: "text-green-600",
     },
     {
-      title: "Suspended Members",
-      value: stats.suspendedMembers,
+      title: "Inactive Members",
+      value: stats.inactiveMembers,
       icon: "⏸️",
       color: "bg-red-500",
       textColor: "text-red-600",
     },
     {
-      title: "Total Leave Days",
+      title: "Total Leave Days (this month)",
       value: stats.totalLeaveDays,
       icon: "📅",
       color: "bg-purple-500",

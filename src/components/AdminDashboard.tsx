@@ -1,14 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LeaveBookingPeriod, DashboardStats } from "@/types";
 import StatsCards from "@/components/StatsCards";
 import LeaveBookingPeriods from "@/components/LeaveBookingPeriods";
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import TabButton from "@/components/ui/TabButton";
+import { useSession } from "next-auth/react";
+import Loading from "@/components/Loading";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const { data: session, status } = useSession();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
 
   // Mock data - in real app, this would come from API
   // eslint-disable-next-line
@@ -50,15 +54,43 @@ export default function AdminDashboard() {
     },
   ]);
 
-  const stats: DashboardStats = {
-    totalMembers: teamMembers.length,
-    activeMembers: teamMembers.filter((m) => m.status === "active").length,
-    suspendedMembers: teamMembers.filter((m) => m.status === "suspended")
-      .length,
-    totalLeaveDays: 60, // Mock calculation
-    bookedLeaveDays: 15, // Mock calculation
-    remainingLeaveDays: 45, // Mock calculation
-  };
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!session || session.user.role !== "ADMIN") {
+        return;
+      }
+      const res = await fetch("/api/v1/dashboard", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        console.error("Failed to fetch dashboard stats");
+        return;
+      }
+
+      const { stats } = await res.json();
+      console.log("Fetched dashboard stats:", stats);
+      setStats(stats);
+    };
+    fetchStats();
+  }, []); // eslint-disable-line
+
+  if (status === "loading") {
+    return <Loading />;
+  }
+
+  if (!session || session.user.role !== "ADMIN") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+          Access Denied
+        </h1>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-[65px] mb-[73px] md:my-0 min-h-[calc(100vh-138px)] md:h-screen dark:bg-gray-900 dark:text-gray-200 bg-white text-gray-800">
@@ -96,7 +128,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content */}
-        {activeTab === "overview" && <StatsCards stats={stats} />}
+        {activeTab === "overview" && stats && <StatsCards stats={stats} />}
         {activeTab === "periods" && (
           <LeaveBookingPeriods
             periods={bookingPeriods}
