@@ -3,7 +3,7 @@ import NextAuth from "next-auth"
 
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { user } from '@/mock';
+import { MockUsers } from '@/mock';
 // import prisma from '@/lib/prisma';
 
 declare module "next-auth" {
@@ -56,15 +56,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           // Fetch user from database
-          // const user = await prisma.user.findUnique({
-          //   where: { username: credentials.username },
-          // });
+          // const user = getUserByUsername(credentials.username)
 
           // if (!user) {
           //   return null;
           // }
 
-          if (credentials.username !== user.username) {
+          const user = MockUsers.find(user => user.username === credentials.username);
+
+          if (!user) {
             return null;
           }
 
@@ -138,7 +138,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     async signIn({ user }) {
-      // Block inactive users
+      // Block inactive MockUsers
       if (user.status === "INACTIVE") {
         throw new Error("Account is inactive. Contact administrator.");
       }
