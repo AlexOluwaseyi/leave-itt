@@ -5,8 +5,9 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -24,12 +25,12 @@ model User {
 
   // (1) Managerial Relationships
   managerId      String?
-  manager        User?   @relation("ManagerMembers", fields: [managerId], references: [id])
+  manager        User?   @relation("ManagerMembers", fields: [managerId], references: [id], onDelete: SetNull)
   managedMembers User[]  @relation("ManagerMembers")
 
   // (2) Team Relationships
   teamId       String?
-  team         Team?   @relation("TeamMembers", fields: [teamId], references: [id])
+  team         Team?   @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
   managedTeams Team[]  @relation("TeamManager")
 
   // (3) Bookings
@@ -50,7 +51,7 @@ model Team {
 
   // (2) Managerial Relationships
   managerId String?
-  manager   User?   @relation("TeamManager", fields: [managerId], references: [id])
+  manager   User?   @relation("TeamManager", fields: [managerId], references: [id], onDelete: SetNull)
 
   // Bookings Booking[] @relation("TeamBookings")
   bookings Booking[]
