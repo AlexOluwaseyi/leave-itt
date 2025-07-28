@@ -28,25 +28,6 @@ const eslintConfig = [
       "logs/",
     ],
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-  {
-    ignores: [
-      "node_modules/",
-      ".next/",
-      "out/",
-      "build/",
-      "dist/",
-      "coverage/",
-      ".env*", // matches .env, .env.local, etc.
-      "public/",
-      "**/generated/",
-      "prisma/migrations/",
-      "*.config.js",
-      "*.config.ts",
-      "temp/",
-      "logs/",
-    ],
-  },
 ];
 
 export default eslintConfig;
