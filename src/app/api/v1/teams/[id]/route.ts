@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getTeamById, updateTeam } from "@/lib/teams";
 
-export async function GET(
+export async function GET(request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -32,8 +32,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: Request,
+export async function PUT(request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

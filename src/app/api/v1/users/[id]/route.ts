@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getUserById, updateUser, deactivateUser, reactivateUser, updateUserPassword, deleteUser } from "@/lib/users";
 
 
-export async function GET(
+export async function GET(request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -33,8 +33,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: Request,
+export async function PUT(request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -94,7 +93,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+export async function DELETE(request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
