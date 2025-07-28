@@ -6,7 +6,7 @@ import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
 import { useSidebarPin } from "@/context/SidebarPinContext";
 import { usePathname } from "next/navigation";
-import { navLinks } from "@/mock";
+import { NavLinks } from "@/types";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
@@ -22,7 +22,6 @@ export default function Sidebar({ children }: SidebarProps) {
   const { pinned, togglePin } = useSidebarPin();
   const pathname = usePathname();
   const { data: session } = useSession();
-
 
   useEffect(() => {
     // Force session refresh after authentication changes
@@ -110,7 +109,7 @@ export default function Sidebar({ children }: SidebarProps) {
         {/* Nav Links */}
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-2 px-2">
-            {navLinks.map((link, index) => (
+            {NavLinks.map((link, index) => (
               <li key={index}>
                 <a
                   href={link.href}
