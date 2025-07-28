@@ -176,7 +176,7 @@ export default function TeamMembersContent() {
           </p>
         </div>
 
-        <div className="flex flex-row justify-items-stretch justify-between md:flex-row pt-4">
+        <div className="flex flex-row justify-items-stretch justify-between md:justify-end md:gap-x-3 md:flex-row pt-4">
           <button
             onClick={() => setIsBulkImportDialogOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
