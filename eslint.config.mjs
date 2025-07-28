@@ -7,6 +7,7 @@ const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
+  recommendedConfig: {},
 });
 
 const eslintConfig = [
@@ -28,6 +29,16 @@ const eslintConfig = [
       "logs/",
     ],
   },
+  ...compat.extends(
+    "next/core-web-vitals",
+    "next/typescript",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    // 'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    "plugin:@next/next/recommended",
+    "next/typescript",
+    "next/core-web-vitals"
+  ),
 ];
 
 export default eslintConfig;
