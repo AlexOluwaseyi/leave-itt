@@ -169,7 +169,7 @@ const BigCalendar = () => {
     if (session) {
       fetchBookings();
     }
-  });
+  }, []); // eslint-disable-line
 
   const fetchBookings = async () => {
     setisLoading(true);
