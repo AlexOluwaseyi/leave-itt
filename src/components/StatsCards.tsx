@@ -1,4 +1,4 @@
-import { DashboardStats } from "../types";
+import { DashboardStats } from "@/types";
 
 interface StatsCardsProps {
   stats: DashboardStats;

@@ -8,41 +8,12 @@ import { Settings } from "lucide-react";
 import TabButton from "@/components/ui/TabButton";
 import { useSession } from "next-auth/react";
 import Loading from "@/components/Loading";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const { data: session, status } = useSession();
   const [stats, setStats] = useState<DashboardStats | null>(null);
-
-  // Mock data - in real app, this would come from API
-  // eslint-disable-next-line
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@company.com",
-      status: "active",
-      joinDate: new Date("2023-01-15"),
-      department: "Engineering",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@company.com",
-      status: "active",
-      joinDate: new Date("2023-03-20"),
-      department: "Design",
-    },
-    {
-      id: "3",
-      name: "Mike Johnson",
-      email: "mike@company.com",
-      status: "suspended",
-      joinDate: new Date("2022-11-10"),
-      department: "Marketing",
-    },
-  ]);
-
   const [bookingPeriods, setBookingPeriods] = useState<LeaveBookingPeriod[]>([
     {
       id: "1",
@@ -56,24 +27,32 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!session || session.user.role !== "ADMIN") {
-        return;
-      }
-      const res = await fetch("/api/v1/dashboard", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        if (!session || session.user.role !== "ADMIN") {
+          return;
+        }
+        const res = await fetch("/api/v1/dashboard", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      if (!res.ok) {
-        console.error("Failed to fetch dashboard stats");
-        return;
-      }
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.message || "Failed to fetch dashboard stats");
+          return;
+        }
 
-      const { stats } = await res.json();
-      console.log("Fetched dashboard stats:", stats);
-      setStats(stats);
+        const { stats } = await res.json();
+        setStats(stats);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to fetch dashboard stats.");
+        }
+      }
     };
     fetchStats();
   }, []); // eslint-disable-line
@@ -136,6 +115,7 @@ export default function AdminDashboard() {
           />
         )}
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }
