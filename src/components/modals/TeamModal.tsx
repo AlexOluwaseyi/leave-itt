@@ -6,9 +6,11 @@ import { toast, Toaster } from "react-hot-toast";
 export function CreateTeamModal({
   isOpen,
   onCloseAction,
+  onSuccess,
 }: {
   isOpen: boolean;
   onCloseAction: () => void;
+  onSuccess: () => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<CreateTeamData>({
@@ -45,21 +47,25 @@ export function CreateTeamModal({
       });
 
       if (!res.ok) {
-        const { error } = await res.json();
-        throw new Error(error || "Failed to create team");
+        const err = await res.json();
+        throw new Error(err.message || "Failed to create team");
       }
 
-      const newTeam = await res.json();
-      toast.success(`Team '${newTeam.team.alias}' created successfully`);
+      const { team } = await res.json();
+      toast.success(`Team '${team.alias}' created successfully`);
 
       // Reset form and close modal
       setFormData({
         alias: "",
       });
+      onSuccess();
       onCloseAction();
     } catch (error) {
-      console.error("Error adding team:", error);
-      toast.error("Failed to create team.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to create team.");
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTeamById, updateTeam } from "@/lib/teams";
+import { getTeamById, updateTeam, deleteTeam } from "@/lib/teams";
 
 export async function GET(request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -65,6 +65,34 @@ export async function PUT(request: NextRequest,
     console.error("Error updating team:", error);
     return NextResponse.json(
       { message: "Failed to update team" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "ID is required." },
+        { status: 400 }
+      );
+    }
+
+    const team = await deleteTeam(id);
+
+    return NextResponse.json(
+      { message: "Team deleted successfully", team },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting team:", error);
+    return NextResponse.json(
+      { message: "Failed to delete team" },
       { status: 500 }
     );
   }

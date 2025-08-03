@@ -5,8 +5,7 @@ import {
   BulkImportUsersModal,
 } from "@/components/modals/UserModal";
 import { CreateTeamModal } from "@/components/modals/TeamModal";
-import { Users } from "@/types";
-import { MockTeams } from "@/mock";
+import { Teams, Users } from "@/types";
 import { useSessionUrlManager } from "@/hooks/useSessionUrlManager";
 import Loading from "./Loading";
 import { toast, Toaster } from "react-hot-toast";
@@ -16,6 +15,7 @@ export default function TeamMembersContent() {
   const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
   const [isBulkImportDialogOpen, setIsBulkImportDialogOpen] = useState(false);
   const [users, setUsers] = useState<Users[]>([]);
+  const [teams, setTeams] = useState<Teams[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<Users[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState("all");
@@ -31,54 +31,66 @@ export default function TeamMembersContent() {
   useEffect(() => {
     if (!urlUpdated || !session?.user) return;
 
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const query = new URLSearchParams();
-
-        // Use session data directly for immediate fetch (fallback to URL params)
-        const userId = session.user.id;
-        const userRole = session.user.role;
-
-        // Use session from the hook
-        if (userId) query.append("id", userId);
-        if (userRole) query.append("role", userRole.toLowerCase());
-
-        console.log("Fetching users with query:", query);
-
-        const res = await fetch(`/api/v1/users?${query.toString()}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error(`Failed to fetch users: ${res.status}`);
-        }
-
-        const data = await res.json();
-        const usersData = Array.isArray(data) ? data : data.users || [];
-
-        const typedUsers: Users[] = usersData.map((user: Users) => {
-          const team = MockTeams.find((t) => t.id === user.teamId);
-          return {
-            ...user,
-            teamAlias: team?.alias || "No team",
-          };
-        });
-
-        setUsers(typedUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        setUsers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+    fetchData();
   }, [urlUpdated]); // eslint-disable-line
+
+  // Fetch users and teams
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const query = new URLSearchParams();
+
+      // Use session data directly for immediate fetch (fallback to URL params)
+      const userId = session.user.id;
+      const userRole = session.user.role;
+
+      // Use session from the hook
+      if (userId) query.append("id", userId);
+      if (userRole) query.append("role", userRole.toLowerCase());
+
+      const res = await fetch(`/api/v1/users?${query.toString()}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.message || "Failed to fetch users");
+        return;
+      }
+
+      const { users } = await res.json();
+
+      // fetch teams from API
+      const resTeams = await fetch(`/api/v1/teams?${query.toString()}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!resTeams.ok) {
+        const err = await resTeams.json();
+        toast.error(err.message || "Failed to fetch teams.");
+        return;
+      }
+
+      const { teams } = await resTeams.json();
+
+      setUsers(users);
+      setTeams(teams);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to fetch data.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Apply filters and sorting
   useEffect(() => {
@@ -86,7 +98,7 @@ export default function TeamMembersContent() {
 
     // Filter by team
     if (selectedTeam !== "all") {
-      const team = MockTeams.find((t) => t.id === selectedTeam);
+      const team = teams.find((t) => t.id === selectedTeam);
       filtered = filtered.filter((user) => user.team?.alias === team?.alias);
     }
 
@@ -101,7 +113,7 @@ export default function TeamMembersContent() {
     }
 
     setFilteredUsers(filtered);
-  }, [users, selectedTeam, showActiveOnly, sortByName]);
+  }, [users, teams, selectedTeam, showActiveOnly, sortByName]);
 
   const deactivateUser = async (userId: string, currentStatus: string) => {
     try {
@@ -116,31 +128,37 @@ export default function TeamMembersContent() {
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to update user status: ${res.status}`);
+        const err = await res.json();
+        toast.error(err.message);
+        return;
       }
-      const updatedUser = await res.json();
+      const { updatedUser } = await res.json();
+
+      // Update local state
+      const updatedUsers = users.map((user) => {
+        if (user.id === userId) {
+          return {
+            ...user,
+            status: (currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE") as
+              | "ACTIVE"
+              | "INACTIVE",
+          };
+        }
+        return user;
+      });
+      setUsers(updatedUsers);
       toast.success(
         `User status updated: ${
           updatedUser.user.name
         } is now ${updatedUser.user.status.toLowerCase()}`
       );
     } catch (error) {
-      console.error("Error updating user status:", error);
-      toast.error("Failed to update user status");
-    }
-    // Update local state
-    const updatedUsers = users.map((user) => {
-      if (user.id === userId) {
-        return {
-          ...user,
-          status: (currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE") as
-            | "ACTIVE"
-            | "INACTIVE",
-        };
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to update user.");
       }
-      return user;
-    });
-    setUsers(updatedUsers);
+    }
   };
 
   const handleTeamFilterChange = (teamValue: string) => {
@@ -162,7 +180,7 @@ export default function TeamMembersContent() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 py-8 bg-white dark:bg-gray-900">
       <h1 className="text-3xl font-bold mb-6 dark:text-gray-200 text-gray-900">
-        Team Members Management
+        Team Management
       </h1>
 
       <div className="flex justify-between min-w-full flex-col mb-6">
@@ -218,9 +236,9 @@ export default function TeamMembersContent() {
                   className="dark:bg-gray-700 bg-white dark:text-gray-100 text-gray-900 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all" className="dark:bg-gray-700 bg-white">
-                    All MockTeams ({users.length})
+                    All Teams ({users.length})
                   </option>
-                  {MockTeams.map((team) => {
+                  {teams.map((team) => {
                     const teamMemberCount = users.filter(
                       (user) => user.team?.alias === team.alias
                     ).length;
@@ -369,17 +387,21 @@ export default function TeamMembersContent() {
       <AddUserModal
         isOpen={isAddUserDialogOpen}
         onCloseAction={() => setIsAddUserDialogOpen(false)}
+        onSuccess={fetchData}
       />
 
       <BulkImportUsersModal
         isOpen={isBulkImportDialogOpen}
         onCloseAction={() => setIsBulkImportDialogOpen(false)}
+        onSuccess={fetchData}
       />
+
       <CreateTeamModal
         isOpen={isCreateTeamDialogOpen}
         onCloseAction={() => setIsCreateTeamDialogOpen(false)}
+        onSuccess={fetchData}
       />
-      <Toaster position="top-center" />
+      <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
     </div>
   );
 }
