@@ -65,3 +65,14 @@ export type Teams = {
 }>
 
 export type CreateTeamData = Omit<Teams, 'id' | 'managerId' | 'createdAt' | 'updatedAt' | 'members'>;
+
+export type Bookings = {
+  id: string;
+  title?: string;
+  date: string;
+  teamId: string;
+  userId: string;
+} & Partial<{
+  createdAt: Date;
+  updatedAt: Date;
+}>;
