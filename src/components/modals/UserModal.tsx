@@ -1,17 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { Users } from "@/types";
+import { Teams, Users } from "@/types";
 import { toast, Toaster } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export function AddUserModal({
   isOpen,
   onCloseAction,
+  onSuccess,
 }: {
   isOpen: boolean;
   onCloseAction: () => void;
+  onSuccess: () => void;
 }) {
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teams, setTeams] = useState([]);
   const [formData, setFormData] = useState<Users>({
     id: "",
     name: "",
@@ -19,7 +24,38 @@ export function AddUserModal({
     password: "",
     role: "MEMBER",
     status: "ACTIVE",
+    teamId: "",
   });
+
+  useEffect(() => {
+    const getTeams = async () => {
+      try {
+        const res = await fetch("/api/v1/teams", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.message || "Failed to fetch teams");
+          return;
+        }
+
+        const { teams } = await res.json();
+        setTeams(teams);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to fetch teams.");
+        }
+      }
+    };
+
+    getTeams();
+  }, []);
 
   if (!isOpen) return null;
 
@@ -44,6 +80,8 @@ export function AddUserModal({
         return;
       }
 
+      console.log(formData);
+
       const res = await fetch("/api/v1/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,12 +89,13 @@ export function AddUserModal({
       });
 
       if (!res.ok) {
-        const { error } = await res.json();
-        throw new Error(error || "Failed to add user");
+        const err = await res.json();
+        toast.error(err.message || "Failed to add user");
+        return;
       }
 
-      const newUser = await res.json();
-      toast.success(`User added: ${newUser.name}`);
+      const { user } = await res.json();
+      toast.success(`User added: ${user.name}`);
 
       // Reset form and close modal
       setFormData({
@@ -69,10 +108,14 @@ export function AddUserModal({
         teamId: "",
         managerId: "",
       });
+      onSuccess();
       onCloseAction();
     } catch (error) {
-      console.error("Error adding user:", error);
-      toast.error("Failed to add user.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to add user.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -117,6 +160,30 @@ export function AddUserModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center">
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+              focus:ring-blue-500 focus:border-blue-500"
+            >
+              {session?.user.role === "ADMIN" && (
+                <>
+                  <option value="MEMBER">Member</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ADMIN">Admin</option>
+                </>
+              )}
+              {session?.user.role === "MANAGER" && (
+                <>
+                  <option value="MEMBER">Member</option>
+                </>
+              )}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Name *
@@ -127,6 +194,7 @@ export function AddUserModal({
               value={formData.name}
               onChange={handleInputChange}
               required
+              disabled={formData.role !== "ADMIN" && teams.length === 0}
               className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
               focus:ring-blue-500 focus:border-blue-500"
@@ -144,6 +212,7 @@ export function AddUserModal({
               value={formData.username}
               onChange={handleInputChange}
               required
+              disabled={formData.role !== "ADMIN" && teams.length === 0}
               className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
               focus:ring-blue-500 focus:border-blue-500"
@@ -161,7 +230,8 @@ export function AddUserModal({
               value={formData.password}
               onChange={handleInputChange}
               required
-              minLength={6}
+              disabled={formData.role !== "ADMIN" && teams.length === 0}
+              minLength={8}
               className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
               focus:ring-blue-500 focus:border-blue-500"
@@ -169,20 +239,34 @@ export function AddUserModal({
             />
           </div>
 
-          <div className="flex items-center">
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
+          {formData.role !== "ADMIN" && (
+            <div className="flex flex-col items-center">
+              <select
+                name="teamId"
+                value={formData.teamId}
+                onChange={handleInputChange}
+                disabled={teams.length === 0}
+                className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
               focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="MEMBER">Member</option>
-              <option value="MANAGER">Manager</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-          </div>
+              >
+                <option value="">Select Team</option>
+                {teams &&
+                  teams.length > 0 &&
+                  teams.map((team: Teams) => (
+                    <option key={team.id} value={team.id}>
+                      {team.alias}
+                    </option>
+                  ))}
+              </select>
+              {/* Display message if no teams are available */}
+              {teams && teams.length === 0 && (
+                <p className="text-sm text-red-500 mt-2">
+                  No teams available. Please create a team first.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end space-x-3 mt-6">
             <button
@@ -214,12 +298,48 @@ export function AddUserModal({
 export function BulkImportUsersModal({
   isOpen,
   onCloseAction,
+  onSuccess,
 }: {
   isOpen: boolean;
   onCloseAction: () => void;
+  onSuccess: () => void;
 }) {
+  const { data: session } = useSession();
+  const [teams, setTeams] = useState<Teams[]>([]);
   const [csvContent, setCsvContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [role, setRole] = useState("MEMBER");
+  const [teamId, setTeamId] = useState("");
+
+  useEffect(() => {
+    const getTeams = async () => {
+      try {
+        const res = await fetch("/api/v1/teams", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.message || "Failed to fetch teams");
+          return;
+        }
+
+        const { teams } = await res.json();
+        setTeams(teams);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to fetch teams.");
+        }
+      }
+    };
+
+    getTeams();
+  }, []);
 
   if (!isOpen) return null;
 
@@ -227,48 +347,37 @@ export function BulkImportUsersModal({
     setIsSubmitting(true);
     try {
       // Parse CSV content and import users
-      const users = csvContent
-        .trim()
-        .split("\n")
-        .map((line) => {
-          const [name, email, password, role] = line
-            .split(",")
-            .map((item) => item.trim());
-          return { name, username: email, password, role: role || "MEMBER" };
-        })
-        .filter((user) => user.name && user.username && user.password);
-
-      if (users.length === 0) {
-        alert("Please provide valid CSV content");
-        return;
-      }
+      // CSV parsing implemented in importBulkUsers
 
       const res = await fetch("/api/v1/users", {
         method: "POST",
-        headers: { "Content-Type": "text/csv" },
-        body: JSON.stringify({
-          users: users.map((user) => ({
-            ...user,
-            role: "MEMBER",
-            status: "ACTIVE",
-            teamId: "",
-            managerId: "",
-          })),
-        }),
+        headers: {
+          "Content-Type": "text/csv",
+          "X-Role": role,
+          "X-Team-Id": teamId,
+        },
+        body: csvContent,
       });
 
       if (!res.ok) {
-        const { error } = await res.json();
-        throw new Error(error || "Failed to import users");
+        const err = await res.json();
+        toast.error(err.message || "Failed to import users");
       }
 
-      const result = await res.json();
-      toast.success(`Users imported: ${result.length} users`);
+      const { bulkUsers } = await res.json();
+      toast.success(`Users imported: ${bulkUsers.length} users`, {
+        duration: 5000,
+      });
+
       setCsvContent("");
+      onSuccess();
       onCloseAction();
     } catch (error) {
-      console.error("Error importing users:", error);
-      toast.error("Failed to import users.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to import users.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -277,20 +386,46 @@ export function BulkImportUsersModal({
   return (
     <div
       className="fixed inset-0 dark:bg-black bg-white bg-opacity-50 flex items-center justify-center p-4"
-      //   onClick={onCloseAction}
+      onClick={onCloseAction}
     >
-      <div className="bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-500 max-w-md w-full p-6">
+      <div
+        className="bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-500 max-w-md w-full p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-4">
           <h3 className="text-lg font-medium dark:text-gray-200 text-gray-900">
             Import Users
           </h3>
           <p className="text-sm text-gray-500">
             Upload a CSV file with user data. <br /> Format:
-            name,email,password,role
+            name,username,password
           </p>
         </div>
 
         <div className="space-y-4">
+          <div className="flex items-center">
+            <select
+              name="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
+          bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+          focus:ring-blue-500 focus:border-blue-500"
+            >
+              {session?.user.role === "ADMIN" && (
+                <>
+                  <option value="MEMBER">Member</option>
+                  <option value="ADMIN">Admin</option>
+                </>
+              )}
+              {session?.user.role === "MANAGER" && (
+                <>
+                  <option value="MEMBER">Member</option>
+                </>
+              )}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-900 dark:text-gray-200">
               CSV Content
@@ -300,7 +435,7 @@ export function BulkImportUsersModal({
               value={csvContent}
               onChange={(e) => setCsvContent(e.target.value)}
               className="mt-1 block w-full border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-gray-500 text-gray-900 dark:text-gray-200 "
-              placeholder="John Doe,john@example.com,password123,USER"
+              placeholder="John Doe,johndoe,password123"
             />
           </div>
 
@@ -309,18 +444,48 @@ export function BulkImportUsersModal({
               Example:
             </h4>
             <pre className="mt-1 p-2 bg-white dark:bg-gray-900 text-gray-500 rounded text-xs">
-              John Doe,john@example.com,password123,USER
+              John Doe,johndoe01,password123
               <br />
-              Jane Smith,jane@example.com,securepass,ADMIN
+              Jane Smith,janesmith02,securepass
             </pre>
           </div>
+
+          {role === "MEMBER" && (
+            <div className="flex flex-col items-center">
+              <select
+                name="teamId"
+                value={teamId}
+                onChange={(e) => setTeamId(e.target.value)}
+                disabled={teams.length === 0}
+                required
+                className="mt-1 block w-full border border-gray-500 rounded-md px-3 py-2 
+          bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+          focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select Team</option>
+                {teams &&
+                  teams.length > 0 &&
+                  teams.map((team: Teams) => (
+                    <option key={team.id} value={team.id}>
+                      {team.alias}
+                    </option>
+                  ))}
+              </select>
+              {/* Display message if no teams are available */}
+              {teams && teams.length === 0 && (
+                <p className="text-sm text-red-500 mt-2">
+                  No teams available. Please create a team first.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
               onClick={onCloseAction}
               className="px-4 py-2 rounded-md text-sm font-medium text-white
-              bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancel
             </button>
@@ -334,7 +499,6 @@ export function BulkImportUsersModal({
           </div>
         </div>
       </div>
-      <Toaster position="top-center" />
     </div>
   );
 }

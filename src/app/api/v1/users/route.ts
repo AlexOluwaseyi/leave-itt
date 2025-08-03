@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role') || "";
 
     let users;
-    console.log("ID: ", id, "Role: ", role);
 
     if (id && role === 'manager') {
       users = await getUserbyTeam(id);
@@ -31,11 +30,21 @@ export async function POST(request: NextRequest) {
 
     // Handle bulk CSV import
     if (contentType?.includes("text/csv")) {
+      const role = request.headers.get("X-Role");
+      const teamId = request.headers.get("X-Team-Id");
+
+      if (!role || !teamId) {
+        return NextResponse.json(
+          { error: "Role and Team ID are required for bulk import" },
+          { status: 400 }
+        );
+      }
+
       const csvData = await request.text(); // raw text
-      const createdUsers = await importBulkUsers(csvData);
+      const bulkUsers = await importBulkUsers(csvData, role, teamId);
 
       return NextResponse.json(
-        { message: "Bulk import successful", users: createdUsers },
+        { message: "Bulk import successful", bulkUsers },
         { status: 201 }
       );
     }
@@ -45,7 +54,7 @@ export async function POST(request: NextRequest) {
     const { name, username, password, role, status, teamId, managerId } = body;
 
     // Basic validation
-    if (!name || !username || !password || !role || !status) {
+    if (!name || !username || !password || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }

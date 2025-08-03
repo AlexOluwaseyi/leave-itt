@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserById, updateUser, deactivateUser, reactivateUser, updateUserPassword, deleteUser } from "@/lib/users";
+import { getUserById, updateUser, deactivateUser, reactivateUser, deleteUser } from "@/lib/users";
 
 
 export async function GET(request: NextRequest,
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest,
       );
     }
 
-    const { name, username, role, status, teamId, managerId, password } = body;
+    const { name, username, role, status, teamId, managerId } = body;
 
     if (status) {
       if (status === "INACTIVE") {
@@ -62,26 +62,17 @@ export async function PUT(request: NextRequest,
       }
     }
 
-    if (password) {
-      const updatedUser = await updateUserPassword(id, password);
-      return NextResponse.json(
-        { message: "User password updated successfully", user: updatedUser },
-        { status: 200 }
-      );
-    }
-
     // You'll need to import updateUser from your users lib
     const updatedUser = await updateUser(id, {
       name,
       username,
       role,
-      password,
       teamId,
       managerId,
     });
 
     return NextResponse.json(
-      { message: "User updated successfully", user: updatedUser },
+      { message: "User updated successfully", updatedUser },
       { status: 200 }
     );
   } catch (error) {
