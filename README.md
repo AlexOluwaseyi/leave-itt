@@ -1,43 +1,165 @@
 # LEAVE-IT
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A modern leave management system built with Next.js, designed to streamline employee leave booking and records.
+
 ---
 **Production:**
 [![Netlify Status](https://api.netlify.com/api/v1/badges/034ecc4a-733b-4ad6-af54-261edfe61b68/deploy-status)](https://app.netlify.com/projects/leave-it/deploys)
 **Development:**
 [![Netlify Status](https://api.netlify.com/api/v1/badges/034ecc4a-733b-4ad6-af54-261edfe61b68/deploy-status?branch=dev)](https://app.netlify.com/projects/leave-it/deploys)
 
-## Getting Started
+## 📖 Storyline
 
-First, run the development server:
+**The Problem:**
+In many organizations today, managing employee leave requests is a chaotic manual process. Employees submit leave requests through chat applications like WhatsApp or Microsoft Teams, creating a scattered trail of messages that's difficult to track and manage. Managers find themselves scrolling through endless chat histories, trying to piece together who requested what dates, when requests were made, and whether they've been approved or denied. This leads to:
+
+- **Missed requests** buried in chat threads
+- **Double bookings** when multiple employees request the same critical dates
+- **No centralized record** of leave history or patterns
+- **Time-consuming manual tracking** for managers
+- **Poor visibility** into team availability and leave balances
+
+**The Solution:**
+Leave-It eliminates this chaos by providing a centralized, digital platform where:
+
+- **Employees** can easily select and request leave dates through an intuitive calendar interface
+- **Managers** get a clear dashboard to review, approve, or deny requests with full context
+- **Administrators** have complete oversight with analytics and team management tools
+- **Everyone** benefits from a permanent, searchable record of all leave activities
+
+**The Impact:**
+No more lost requests in chat threads. No more manual spreadsheet tracking. Just a streamlined, professional leave management system that scales with your organization's needs.  
+
+<br>
+
+*"From chat chaos to organized clarity - Leave-It transforms how your team manages time off."*
+
+---
+
+## 🚀 Features
+
+- **Role-Based Authentication**: Secure login system with Admin, Manager, and Member roles
+- **Leave Management**: Request, approve, and track leave applications
+- **Calendar Integration**: Visual calendar view powered by React Big Calendar
+- **User Management**: Admin dashboard for managing users and teams
+- **Bulk Import**: CSV import functionality for adding multiple users
+- **Dashboard Analytics**: Statistics and insights for leave patterns
+- **Dark/Light Theme**: Toggle between themes for better user experience
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Cloud storage**: Neon
+- **Authentication**: Auth.js v5
+- **UI Components**: React Big Calendar, Lucide Icons
+- **Deployment**: Netlify
+
+## 🏃‍♂️ Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- PostgreSQL database
+- npm/yarn/pnpm/bun
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/.git
+   cd 
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   touch .env
+   ```
+   
+   Update `.env` with your database URL and authentication secrets:
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/leaveitt"
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key"
+   AUTH_SECRET="your-auth-secret"
+   ```
+
+4. **Set up the database**
+   ```bash
+   npx prisma migrate dev
+   npx prisma db seed  # Optional: seed with sample data
+   ```
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## 📊 Default Roles & Access
+
+- **Admin**: Full system access, user management, system settings.
+- **Manager**: Team management, team leave requests, add new members to team(s).
+- **Member**: Book leave days, view own leave history, manage own profile (password reset).
+
+## 🔧 Available Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/                # Next.js 14 app router
+│   ├── api/            # API routes
+│   ├── auth/           # Authentication pages
+│   ├── dashboard/      # Dashboard page
+│   ├── history/        # Booking history page
+│   ├── profile/        # Profile page
+│   ├── settings/       # Settings page 
+│   └── teams/          # Team management page
+├── components/         # Reusable components
+│   ├── calendar/       # Calendar components
+│   ├── menu/           # Sidebar and header components
+│   ├── modals/         # Modal components
+│   └── ui/             # UI components
+├── context/            # Custom context managers
+├── hooks/              # Custom hooks
+├── lib/                # Utility functions
+├── types/              # TypeScript type definitions
+└── hooks/              # Custom hooks
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contributing
 
-## Learn More
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-To learn more about Next.js, take a look at the following resources:
+## 📝 License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<!-- ## 🙏 Acknowledgments
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org/) for the amazing framework
+- [Prisma](https://prisma.io/) for database management
+- [NextAuth.js](https://next-auth.js.org/) for authentication
+- [React Big Calendar](https://jquense.github.io/react-big-calendar/) for calendar functionality -->
