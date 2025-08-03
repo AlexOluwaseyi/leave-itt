@@ -1,4 +1,4 @@
-import { Home, Users, Settings, LayoutDashboard, History } from "lucide-react";
+import { Home, Users, Settings, LayoutDashboard, History, UserRound } from "lucide-react";
 
 export const NavLinks = [
   { icon: Home, text: "Home", href: "/" },
@@ -6,6 +6,7 @@ export const NavLinks = [
   { icon: Users, text: "Teams", href: "/teams" },
   { icon: History, text: "History", href: "/history" },
   { icon: Settings, text: "Settings", href: "/settings" },
+  { icon: UserRound, text: "Profile", href: "/profile" },
 ];
 
 export interface LeaveBooking {
