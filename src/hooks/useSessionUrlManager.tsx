@@ -113,13 +113,6 @@ export function useSessionUrlManager({
           window.location.pathname
         }?${currentParams.toString()}`;
         window.history.replaceState({}, "", newUrl);
-
-        console.log("URL rewritten with session context:", {
-          path: currentPath,
-          userId: session.user.id,
-          userRole: session.user.role,
-          rewrittenUrl: newUrl,
-        });
       }
 
       setUrlUpdated(true);

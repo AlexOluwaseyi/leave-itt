@@ -8,7 +8,6 @@ interface AccessControlWrapperProps {
   requiredRoles?: string[];
   redirectTo?: string;
   skipUrlRewrite?: boolean;
-  showUserContext?: boolean;
 }
 
 export default function AccessControlWrapper({
