@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { toast, Toaster } from "react-hot-toast";
 
 // Import signIn and signOut functions from auth library
@@ -40,7 +39,7 @@ export default function Login() {
         }
       } else if (res?.ok) {
         // Successful login, redirect manually
-        window.location.href = "/dashboard";
+        window.location.href = "/";
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -94,6 +93,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-600 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               required
+              autoComplete="current-password"
             />
           </div>
           <div className="flex items-center justify-between">
@@ -106,12 +106,6 @@ export default function Login() {
                 Remember me
               </label>
             </div>
-            <Link
-              href="/forgot-password"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Forgot password?
-            </Link>
           </div>
           <button
             type="submit"
@@ -120,15 +114,6 @@ export default function Login() {
             Sign in
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Sign up
-          </Link>
-        </p>
       </div>
       <Toaster position="top-center" />
     </div>

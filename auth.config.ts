@@ -3,7 +3,8 @@ import NextAuth from "next-auth"
 
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { MockUsers } from '@/mock';
+import { getUserByUsername } from '@/lib/users';
+
 // import prisma from '@/lib/prisma';
 
 declare module "next-auth" {
@@ -40,7 +41,6 @@ declare module "next-auth" {
   }
 }
 
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     CredentialsProvider({
@@ -56,13 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           // Fetch user from database
-          // const user = getUserByUsername(credentials.username)
-
-          // if (!user) {
-          //   return null;
-          // }
-
-          const user = MockUsers.find(user => user.username === credentials.username);
+          const user = await getUserByUsername(credentials.username as string)
 
           if (!user) {
             return null;
@@ -80,10 +74,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: user.name,
             role: user.role as "ADMIN" | "MANAGER" | "MEMBER",
             status: user.status as "ACTIVE" | "INACTIVE",
-            teamId: user.teamId,
-            managerId: user.managerId,
+            teamId: user.teamId || undefined,
+            managerId: user.managerId || undefined,
           };
-        } catch (error: any) { // eslint-disable-line
+        } catch (error) {
           console.error('Error during authorization:', error);
           throw new Error("Authorization failed");
         }
@@ -93,13 +87,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   session: {
     strategy: "jwt",
-    maxAge: 5 * 60, // 5 minutes
-    // maxAge: 24 * 60 * 60, // 1 days
+    maxAge: 30 * 60, // 30 minutes
   },
 
   jwt: {
-    maxAge: 5 * 60, // 5 minutes
-    // maxAge: 24 * 60 * 60, // 1 days
+    maxAge: 30 * 60, // 30 minutes
   },
 
   callbacks: {
@@ -138,7 +130,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     async signIn({ user }) {
-      // Block inactive MockUsers
+      // Block inactive users
       if (user.status === "INACTIVE") {
         throw new Error("Account is inactive. Contact administrator.");
       }
