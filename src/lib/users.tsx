@@ -1,22 +1,7 @@
 import prisma from "@/lib/prisma";
-import { MockUsers } from "@/mock";
 import { Users, CreateUserData } from "@/types";
 import bcrypt from "bcryptjs";
 import { auth } from "~/auth.config";
-
-// Transform MockUsers to match the expected structure
-const transformedMockUsers = MockUsers.map((mockUser) => ({
-  id: mockUser.id,
-  name: mockUser.name,
-  username: mockUser.username,
-  role: mockUser.role as "ADMIN" | "MANAGER" | "MEMBER",
-  status: mockUser.status as "ACTIVE" | "INACTIVE",
-  teamId: mockUser.teamId,
-  managerId: mockUser.managerId as string,
-  team: mockUser.team?.alias ? { alias: mockUser.team.alias } : null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}));
 
 export async function getUsers() {
   try {
@@ -39,8 +24,6 @@ export async function getUsers() {
         updatedAt: true,
       },
     });
-
-    users.push(...transformedMockUsers);
 
     return users;
   } catch (error) {
@@ -72,10 +55,6 @@ export async function getUserbyTeam(id: string) {
         updatedAt: true,
       },
     });
-
-    teamMembers.push(
-      ...transformedMockUsers.filter((user) => user.managerId === id)
-    );
 
     return teamMembers;
   } catch (error) {
@@ -135,7 +114,11 @@ export async function updateUser(userId: string, userData: Partial<Users>) {
   }
 }
 
-export async function updateUserPassword(userId: string, newPassword: string) {
+export async function updateUserPassword(
+  userId: string,
+  oldPassword: string,
+  newPassword: string
+) {
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
@@ -146,6 +129,12 @@ export async function updateUserPassword(userId: string, newPassword: string) {
     });
     if (!user) {
       throw new Error("User not found.");
+    }
+
+    // Check current password
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Current password is incorrect.");
     }
 
     const updatedUser = await prisma.user.update({
@@ -177,6 +166,17 @@ export async function updateUserPassword(userId: string, newPassword: string) {
 
 export async function deactivateUser(userId: string) {
   try {
+    const session = await auth();
+    if (!session || !session.user) {
+      throw new Error("No user session found.");
+    }
+
+    const { id } = session.user;
+
+    if (id === userId) {
+      throw new Error("You cannot deactivate your own account.");
+    }
+
     const deactivatedUser = await prisma.user.update({
       where: { id: userId },
       data: { status: "INACTIVE", updatedAt: new Date() },
@@ -348,16 +348,6 @@ export async function addUser(userData: CreateUserData) {
       throw new Error("User not authenticated or role not found.");
     }
 
-    // Check for required fields
-    if (
-      !userData.name ||
-      !userData.username ||
-      !userData.password ||
-      !userData.role
-    ) {
-      throw new Error("Missing required fields");
-    }
-
     // If signed in user is a member, not manager or admin
     if (role === "MEMBER") {
       throw new Error("User not authorized to add users.");
@@ -406,24 +396,31 @@ export async function addUser(userData: CreateUserData) {
       }
       if (userData.role === "MEMBER") {
         // Check if teamId is provided
-        if (!userData.managerId) {
+        if (!userData.teamId) {
           throw new Error("Manager ID is required for creating a member.");
         }
         // Check if teamId exists
-        const manager = await prisma.user.findUnique({
-          where: { id: userData.managerId },
-          select: {
-            id: true,
-            teamId: true,
-          },
+        const team = await prisma.team.findUnique({
+          where: { id: userData.teamId },
         });
-        if (!manager) {
-          throw new Error("Manager does not exist. Create one first.");
+        if (!team) {
+          throw new Error("Team does not exist. Create one first.");
         }
-        userData.teamId = manager.teamId as string;
+        userData.teamId = team.id as string;
+        userData.managerId = team.managerId as string; // Set managerId from team
       }
       if (userData.role === "ADMIN") {
       }
+    }
+
+    // Check for required fields
+    if (
+      !userData.name ||
+      !userData.username ||
+      !userData.password ||
+      !userData.role
+    ) {
+      throw new Error("Missing required fields");
     }
 
     // Check if user already exists
@@ -456,6 +453,15 @@ export async function addUser(userData: CreateUserData) {
         updatedAt: true,
       },
     });
+
+    // Update managerId on team if user is a manager
+    if (userData.role === "MANAGER" && userData.teamId) {
+      await prisma.team.update({
+        where: { id: userData.teamId },
+        data: { managerId: newUser.id, updatedAt: new Date() },
+      });
+    }
+
     return newUser;
   } catch (error) {
     console.error("Error adding user:", error);
@@ -463,22 +469,35 @@ export async function addUser(userData: CreateUserData) {
   }
 }
 
-export async function importBulkUsers(csvData: string) {
+export async function importBulkUsers(
+  csvData: string,
+  role: string,
+  teamId: string
+) {
   try {
     const usersArray = csvData.split("\n").map((line) => {
-      const [name, username, password, role, status, teamId, managerId] =
-        line.split(",");
+      const [name, username, password] = line.split(",");
 
       return {
         name: name.trim(),
         username: username.trim(),
         password: password.trim(),
         role: role.trim().toUpperCase() as "ADMIN" | "MANAGER" | "MEMBER",
-        status: status.trim().toUpperCase() as "ACTIVE" | "INACTIVE",
         teamId: teamId?.trim() || undefined,
-        managerId: managerId?.trim() || undefined,
+        // managerId: managerId?.trim() || undefined,
       };
     });
+
+    // get managerId by teamId
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+      select: { managerId: true },
+    });
+
+    if (!team) {
+      throw new Error("Team not found for the provided team ID.");
+    }
+    const managerId = team.managerId;
 
     const salt = await bcrypt.genSalt(10);
 
@@ -487,12 +506,13 @@ export async function importBulkUsers(csvData: string) {
       const results = [];
       for (const userData of usersArray) {
         const hashedPassword = await bcrypt.hash(userData.password, salt);
+        console.log(userData);
         const user = await prisma.user.create({
           data: {
             ...userData,
             password: hashedPassword,
             teamId: userData.teamId as string,
-            managerId: userData.managerId as string,
+            managerId: managerId as string,
           },
           select: {
             id: true,
@@ -513,6 +533,7 @@ export async function importBulkUsers(csvData: string) {
         });
         results.push(user);
       }
+      console.log(results);
       return results;
     });
 

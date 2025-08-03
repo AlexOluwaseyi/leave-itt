@@ -1,14 +1,4 @@
 import prisma from "@/lib/prisma";
-import { MockTeams } from "@/mock";
-
-// Transform MockTeams to match the expected structure
-const transformedMockTeams = MockTeams.map((team) => ({
-  id: team.id,
-  alias: team.alias,
-  manager: null, // Use the actual manager data from MockTeams
-  members: team.members || [],
-  managerId: team.managerId,
-}));
 
 export async function getTeams() {
   try {
@@ -16,7 +6,14 @@ export async function getTeams() {
       select: {
         id: true,
         alias: true,
-        manager: true,
+        manager: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            role: true,
+          },
+        },
         members: {
           select: {
             id: true,
@@ -27,8 +24,6 @@ export async function getTeams() {
         },
       },
     });
-
-    teams.push(...transformedMockTeams);
 
     return teams;
   } catch (error) {
@@ -81,8 +76,6 @@ export async function getTeamByManagerId(id: string) {
       },
     });
 
-    // team.push(...transformedMockTeams.filter((team) => team.managerId === id));
-
     return team;
   } catch (error) {
     console.error("Error fetching team by ID:", error);
@@ -121,5 +114,17 @@ export async function updateTeam(
   } catch (error) {
     console.error("Error updating team:", error);
     throw new Error("Failed to update team");
+  }
+}
+
+export async function deleteTeam(id: string) {
+  try {
+    const team = await prisma.team.delete({
+      where: { id },
+    });
+    return team;
+  } catch (error) {
+    console.error("Error deleting team:", error);
+    throw new Error("Failed to delete team");
   }
 }
