@@ -30,7 +30,7 @@ Leave-It eliminates this chaos by providing a centralized, digital platform wher
 **The Impact:**
 No more lost requests in chat threads. No more manual spreadsheet tracking. Just a streamlined, professional leave management system that scales with your organization's needs.  
 
-<br>
+&nbsp;
 
 *"From chat chaos to organized clarity - Leave-It transforms how your team manages time off."*
 
@@ -61,19 +61,21 @@ No more lost requests in chat threads. No more manual spreadsheet tracking. Just
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL database
 - npm/yarn/pnpm/bun
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/.git
    cd 
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -81,11 +83,13 @@ No more lost requests in chat threads. No more manual spreadsheet tracking. Just
    ```
 
 3. **Set up environment variables**
+
    ```bash
    touch .env
    ```
-   
+
    Update `.env` with your database URL and authentication secrets:
+
    ```env
    DATABASE_URL="postgresql://username:password@localhost:5432/leaveitt"
    NEXTAUTH_URL="http://localhost:3000"
@@ -94,12 +98,14 @@ No more lost requests in chat threads. No more manual spreadsheet tracking. Just
    ```
 
 4. **Set up the database**
+
    ```bash
    npx prisma migrate dev
    npx prisma db seed  # Optional: seed with sample data
    ```
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -123,7 +129,7 @@ npm run lint         # Run ESLint
 
 ## 📁 Project Structure
 
-```
+```bash
 src/
 ├── app/                # Next.js 14 app router
 │   ├── api/            # API routes

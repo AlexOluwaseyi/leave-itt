@@ -4,28 +4,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.3] - 2025-08-05
+
+### 🚀 Features
+
+#### UI Redesign
+
+- Redesigned UI for modals and sign-in page with improved user experience
+- Enhanced Profile component with comprehensive user and booking data fetching
+- Added loading states and error handling for better user feedback
+
+#### Access Control
+
+- Enhanced access control logic in AdminDashboard to support both ADMIN and MANAGER roles
+- Updated fallback routes for different user roles for better navigation flow
 
 ### 🔄 Refactor
 
-**Calendar Data Management**
-- Implement real-time data fetching with automatic refresh for calendar events.
-- Add client-side caching to reduce database queries and improve performance.
-- Optimize booking data synchronization across user sessions.
+#### Data Management
 
-### 🚀 Planned Features
+- Implement polling with setInterval for repeated database fetching at intervals
+- Update booking data fetching to only occur when user is authenticated
+- Remove unused router logic and access control checks from AccessControlWrapper component
 
-**Enhanced Calendar Experience**
-- Auto-refresh calendar when new bookings are created or updated.
-- Real-time conflict detection for overlapping leave requests.
-- Improved loading states and error handling for calendar events.
+### 🐛 Bug Fixes
 
-### 🛠️ Technical Improvements
+#### Error Handling
 
-**Performance Optimizations**
-- Review WebSockets, SWR or React Query for better data fetching patterns.
-- Add optimistic updates for immediate UI feedback.
-- Reduce unnecessary re-renders in calendar components.
+- Improved error handling and error message throwing from functions and API routes
+- Enhanced error feedback throughout the application with better toast implementations
+
+#### Component Management
+
+- Fix modal success callback prop names for consistency across components
+- Resolve booking data fetching issues with proper authentication checks
 
 ---
 
@@ -33,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Bug Fixes
 
-**Data fetching and component re-rendering**
+#### Data fetching and component re-rendering
+
 - Fix page re-rendering on home page due to incorrect useEffect implementation
 
 ---
@@ -42,31 +55,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 
-**Authentication & Authorization**
+#### Authentication & Authorization
+
 - Implement NextAuth.js authentication with credentials provider
 - Add role-based access control with AccessControlWrapper
 - Add session management and URL rewriting
 - Implement middleware for route protection
 
-**User Management**
+#### User Management
+
 - Add admin dashboard with user and team management
 - Implement bulk user import via CSV
 - Add user profile component with password reset functionality
 - Support for user status management (active/inactive)
 
-**Leave Booking System**
+#### Leave Booking System
+
 - Implement booking management with calendar integration (React Big Calendar)
 - Add booking history and statistics
 - Support for leave approval workflows
 - Implement booking periods and special days configuration
 
-**Dashboard & Interface**
+#### Dashboard & Interface
+
 - Complete responsive UI implementation (desktop and mobile)
 - Add dark/light theme support
 - Implement admin dashboard with statistics
 - Add settings page for booking configuration
 
-**Database & API**
+#### Database & API
+
 - Set up Prisma ORM with PostgreSQL
 - Implement comprehensive API routes for users, teams, and bookings
 - Add database models for users, teams, bookings, and settings
@@ -76,18 +94,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Bug Fixes
 
-**UI/UX Improvements**
+#### UI/UX Improvements
+
 - Fix dark mode text contrast issues
 - Resolve calendar layout and styling problems
 - Fix responsive design issues on mobile
 - Improve button alignment and component layouts
 
-**Authentication & Security**
+#### Authentication & Security
+
 - Remove case sensitivity in username field
 - Fix sign-in page redirect issues
 - Improve session handling and logout functionality
 
-**Code Quality**
+#### Code Quality
+
 - Clean up unused imports and unnecessary code
 - Fix TypeScript import errors
 - Improve error handling across components
@@ -96,6 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### 📝 Documentation
+
 - Add deployment status badges
 - Update README with project information
 - Add comprehensive changelog documentation
@@ -103,6 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ##
-[Unreleased]: https://github.com/alexoluwaseyi/leave-itt/compare/v0.1.1...dev
+
+[0.1.3]: https://github.com/alexoluwaseyi/leave-itt/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/alexoluwaseyi/leave-itt/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/alexoluwaseyi/leave-itt/releases/tag/v0.1.1
