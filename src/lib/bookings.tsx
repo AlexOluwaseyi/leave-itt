@@ -20,8 +20,9 @@ export async function getBookings() {
     });
     return bookings;
   } catch (error) {
-    console.error("Error fetching bookings:", error);
-    throw new Error("Could not fetch bookings");
+    throw new Error(
+      error instanceof Error ? error.message : "Could not fetch bookings"
+    );
   }
 }
 
@@ -45,8 +46,9 @@ export async function getBookingsByUserId(userId: string) {
     });
     return bookings;
   } catch (error) {
-    console.error("Error fetching user bookings:", error);
-    throw new Error("Could not fetch user bookings");
+    throw new Error(
+      error instanceof Error ? error.message : "Could not fetch user bookings"
+    );
   }
 }
 
@@ -69,8 +71,9 @@ export async function getBookingsByTeamId(teamId: string) {
     });
     return bookings;
   } catch (error) {
-    console.error("Error fetching team bookings:", error);
-    throw new Error("Could not fetch team bookings");
+    throw new Error(
+      error instanceof Error ? error.message : "Could not fetch team bookings"
+    );
   }
 }
 
@@ -110,8 +113,11 @@ export async function getBookingsByTeam(id: string) {
 
     return bookings;
   } catch (error) {
-    console.error("Error fetching bookings by team:", error);
-    throw new Error("Could not fetch bookings by team");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Could not fetch bookings by team"
+    );
   }
 }
 
@@ -134,8 +140,11 @@ export async function getBookingsByDate(date: string) {
     });
     return bookings;
   } catch (error) {
-    console.error("Error fetching bookings by date:", error);
-    throw new Error("Could not fetch bookings by date");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Could not fetch bookings by date"
+    );
   }
 }
 
@@ -178,8 +187,11 @@ export async function getBookingsByMonth(month: string, managerId?: string) {
     });
     return bookings;
   } catch (error) {
-    console.error("Error fetching bookings by month:", error);
-    throw new Error("Could not fetch bookings by month");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Could not fetch bookings by month"
+    );
   }
 }
 
@@ -214,8 +226,9 @@ export async function createBooking(bookingData: Bookings) {
     });
     return booking;
   } catch (error) {
-    console.error("Error creating booking:", error);
-    throw new Error("Failed to create booking.");
+    throw new Error(
+      error instanceof Error ? error.message : "Could not create booking"
+    );
   }
 }
 
@@ -226,7 +239,8 @@ export async function deleteBooking(bookingId: string) {
     });
     return booking;
   } catch (error) {
-    console.error("Error deleting booking:", error);
-    throw new Error("Could not delete booking");
+    throw new Error(
+      error instanceof Error ? error.message : "Could not delete booking"
+    );
   }
 }

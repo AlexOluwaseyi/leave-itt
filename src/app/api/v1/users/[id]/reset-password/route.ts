@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest,
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json(
-      { message: "Failed to update user" },
+      { message: `${error}` },
       { status: 500 }
     );
   }

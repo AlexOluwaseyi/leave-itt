@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching bookings:", error);
     return NextResponse.json(
-      { message: "Failed to fetch bookings" },
+      { message: `${error}` },
       { status: 500 }
     );
   }

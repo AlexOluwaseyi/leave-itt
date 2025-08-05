@@ -27,8 +27,9 @@ export async function getUsers() {
 
     return users;
   } catch (error) {
-    console.error("Error fetching all users:", error);
-    throw new Error("Failed to fetch users");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch users"
+    );
   }
 }
 
@@ -58,8 +59,9 @@ export async function getUserbyTeam(id: string) {
 
     return teamMembers;
   } catch (error) {
-    console.error("Error fetching team members:", error);
-    throw new Error("Failed to fetch team members");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch team members"
+    );
   }
 }
 
@@ -109,8 +111,9 @@ export async function updateUser(userId: string, userData: Partial<Users>) {
     });
     return updatedUser;
   } catch (error) {
-    console.error("Error updating user:", error);
-    throw new Error("Failed to update user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to update user"
+    );
   }
 }
 
@@ -159,8 +162,9 @@ export async function updateUserPassword(
     });
     return updatedUser;
   } catch (error) {
-    console.log("Error updating user password", error);
-    throw new Error("Failed to update user password");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to update user password"
+    );
   }
 }
 
@@ -192,8 +196,9 @@ export async function deactivateUser(userId: string) {
     });
     return deactivatedUser;
   } catch (error) {
-    console.error("Error deactivating user:", error);
-    throw new Error("Failed to deactivate user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to deactivate user"
+    );
   }
 }
 
@@ -213,8 +218,9 @@ export async function deleteUser(userId: string) {
     });
     return deletedUser;
   } catch (error) {
-    console.error("Error deleting user:", error);
-    throw new Error("Failed to delete user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to delete user"
+    );
   }
 }
 
@@ -235,8 +241,9 @@ export async function reactivateUser(userId: string) {
     });
     return activatedUser;
   } catch (error) {
-    console.error("Error reactivating user:", error);
-    throw new Error("Failed to reactivate user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to reactivate user"
+    );
   }
 }
 
@@ -263,8 +270,9 @@ export async function getUserById(userId: string) {
     });
     return user;
   } catch (error) {
-    console.error("Error fetching user by ID:", error);
-    throw new Error("Failed to fetch user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch user"
+    );
   }
 }
 
@@ -273,8 +281,11 @@ export async function getTotalUsersCount() {
     const totalUsersCount = await prisma.user.count();
     return totalUsersCount;
   } catch (error) {
-    console.error("Error fetching total users count:", error);
-    throw new Error("Failed to fetch total users count");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch total users count"
+    );
   }
 }
 
@@ -285,8 +296,11 @@ export async function getActiveUsersCount() {
     });
     return activeUsersCount;
   } catch (error) {
-    console.error("Error fetching active users count:", error);
-    throw new Error("Failed to fetch active users count");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch active users count"
+    );
   }
 }
 
@@ -297,8 +311,11 @@ export async function getInactiveUsersCount() {
     });
     return inactiveUsersCount;
   } catch (error) {
-    console.error("Error fetching inactive users count:", error);
-    throw new Error("Failed to fetch inactive users count");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch inactive users count"
+    );
   }
 }
 
@@ -327,8 +344,9 @@ export async function getUserByUsername(username: string) {
     });
     return user;
   } catch (error) {
-    console.error("Error fetching user by username:", error);
-    throw new Error("Failed to fetch user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch user"
+    );
   }
 }
 
@@ -464,8 +482,9 @@ export async function addUser(userData: CreateUserData) {
 
     return newUser;
   } catch (error) {
-    console.error("Error adding user:", error);
-    throw new Error("Failed to add user");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to add user"
+    );
   }
 }
 
@@ -539,7 +558,10 @@ export async function importBulkUsers(
 
     return createdUsers;
   } catch (error) {
-    console.error("❌ Transaction failed, no users created:", error);
-    throw new Error("Bulk user import failed. All changes rolled back.");
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "Bulk user import failed. All changes rolled back."
+    );
   }
 }

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ teams, count: teams.length }, { status: 200 });
   } catch (error) {
     console.error("Error fetching teams:", error);
-    return NextResponse.json({ error: "Failed to fetch teams" }, { status: 500 });
+    return NextResponse.json({ message: `${error}` }, { status: 500 });
   }
 }
 
@@ -41,6 +41,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Team created successfully.", team }, { status: 201 });
   } catch (error) {
     console.error("Error creating team:", error);
-    return NextResponse.json({ error: "Failed to create team" }, { status: 500 });
+    return NextResponse.json({ message: `${error}` }, { status: 500 });
   }
 }

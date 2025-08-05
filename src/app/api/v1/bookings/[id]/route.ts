@@ -24,7 +24,7 @@ export async function DELETE(request: NextRequest,
   } catch (error) {
     console.error("Error deleting booking:", error);
     return NextResponse.json(
-      { message: "Failed to delete team" },
+      { message: `${error}` },
       { status: 500 }
     );
   }

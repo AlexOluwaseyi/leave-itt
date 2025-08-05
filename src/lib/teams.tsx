@@ -27,8 +27,9 @@ export async function getTeams() {
 
     return teams;
   } catch (error) {
-    console.error("Error fetching teams:", error);
-    throw new Error("Failed to fetch teams");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch teams"
+    );
   }
 }
 
@@ -52,8 +53,9 @@ export async function getTeamById(id: string) {
     });
     return team ? [team] : [];
   } catch (error) {
-    console.error("Error fetching team by ID:", error);
-    throw new Error("Failed to fetch team by ID");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch team by ID"
+    );
   }
 }
 
@@ -78,8 +80,9 @@ export async function getTeamByManagerId(id: string) {
 
     return team;
   } catch (error) {
-    console.error("Error fetching team by ID:", error);
-    throw new Error("Failed to fetch team by ID");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch team by ID"
+    );
   }
 }
 
@@ -93,8 +96,9 @@ export async function addTeam(data: { alias: string }) {
     });
     return team;
   } catch (error) {
-    console.error("Error creating team:", error);
-    throw new Error("Failed to create team");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to create team"
+    );
   }
 }
 
@@ -112,8 +116,9 @@ export async function updateTeam(
     });
     return team;
   } catch (error) {
-    console.error("Error updating team:", error);
-    throw new Error("Failed to update team");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to update team"
+    );
   }
 }
 
@@ -124,7 +129,8 @@ export async function deleteTeam(id: string) {
     });
     return team;
   } catch (error) {
-    console.error("Error deleting team:", error);
-    throw new Error("Failed to delete team");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to delete team"
+    );
   }
 }

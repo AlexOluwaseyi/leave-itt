@@ -10,9 +10,9 @@ export async function getDashboardStats() {
   const inactiveMembers = await getInactiveUsersCount();
 
   // Mock values for leave days
-  const totalLeaveDays = 60; // This should be calculated based on your business logic
-  const bookedLeaveDays = 15; // This should be calculated based on your business logic
-  const remainingLeaveDays = totalLeaveDays - bookedLeaveDays;
+  const totalLeaveDays = "N/A"; // This should be calculated based on your business logic
+  const bookedLeaveDays = "N/A"; // This should be calculated based on your business logic
+  const remainingLeaveDays = "N/A"; // This should be calculated based on your business logic
 
   return {
     totalMembers,
