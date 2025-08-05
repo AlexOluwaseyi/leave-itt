@@ -173,37 +173,45 @@ const BigCalendar = () => {
   }, [session]); // eslint-disable-line
 
   const fetchBookings = async () => {
-    setisLoading(true);
-    const query = new URLSearchParams();
+    try {
+      setisLoading(true);
+      const query = new URLSearchParams();
 
-    // Use session data directly for immediate fetch (fallback to URL params)
-    const userId = session?.user.id;
-    const userRole = session?.user.role;
+      // Use session data directly for immediate fetch (fallback to URL params)
+      const userId = session?.user.id;
+      const userRole = session?.user.role;
 
-    // Use session from the hook
-    if (userId) query.append("id", userId);
-    if (userRole) query.append("role", userRole.toLowerCase());
+      // Use session from the hook
+      if (userId) query.append("id", userId);
+      if (userRole) query.append("role", userRole.toLowerCase());
 
-    const res = await fetch(`api/v1/bookings?${query.toString()}`, {
-      method: "GET",
-    });
+      const res = await fetch(`api/v1/bookings?${query.toString()}`, {
+        method: "GET",
+      });
 
-    if (!res.ok) {
-      const err = await res.json();
-      toast.error(err.message || "Failed to fetch dashboard stats");
-      return;
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.message || "Failed to fetch dashboard stats");
+        return;
+      }
+      const { bookings } = await res.json();
+
+      const mappedEvents = bookings.map((booking: Bookings) => ({
+        id: booking.id,
+        title: booking.title,
+        start: parseDate(booking.date),
+        end: parseDate(booking.date),
+      }));
+
+      setCalendarEvents(mappedEvents);
+      setisLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to fetch dashboard stats.");
+      }
     }
-    const { bookings } = await res.json();
-
-    const mappedEvents = bookings.map((booking: Bookings) => ({
-      id: booking.id,
-      title: booking.title,
-      start: parseDate(booking.date),
-      end: parseDate(booking.date),
-    }));
-
-    setCalendarEvents(mappedEvents);
-    setisLoading(false);
   };
 
   if (isLoading || status === "loading") {
