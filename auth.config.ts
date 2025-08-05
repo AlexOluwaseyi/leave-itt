@@ -149,5 +149,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signOut: "/auth/signout",
     error: "/auth/error",
   },
-  debug: process.env.NODE_ENV === "production",
 } satisfies NextAuthConfig);
