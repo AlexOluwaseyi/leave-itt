@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+  name     String
+  password String
+  role     Role   @default(MEMBER)
+  status   Status @default(ACTIVE)
+
+  // (1) Managerial Relationships
+  managerId      String?
+  manager        User?   @relation("ManagerMembers", fields: [managerId], references: [id], onDelete: SetNull)
+  managedMembers User[]  @relation("ManagerMembers")
+
+  // (2) Team Relationships
+  teamId       String?
+  team         Team?   @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  managedTeams Team[]  @relation("TeamManager")
+
+  // (3) Bookings
+  bookings Booking[] // One-to-many: user can have multiple bookings ✅
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  alias     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // (1) Team Members
+  members User[] @relation("TeamMembers")
+
+  // (2) Managerial Relationships
+  managerId String?
+  manager   User?   @relation("TeamManager", fields: [managerId], references: [id], onDelete: SetNull)
+
+  // Bookings Booking[] @relation("TeamBookings")
+  bookings Booking[]
+}
+
+model Booking {
+  id    String  @id @default(uuid())
+  title String?
+  date  String
+
+  // Many-to-one relationship with Team
+  // Foreign key teamId
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id]) // ✅
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id]) // ✅
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ✅ This enforces: only one booking per team per date
+  @@unique([teamId, date])
+}
+
+enum Role {
+  MANAGER
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}

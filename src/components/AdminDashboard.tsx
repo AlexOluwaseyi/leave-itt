@@ -1,46 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LeaveBookingPeriod, DashboardStats } from "@/types";
 import StatsCards from "@/components/StatsCards";
 import LeaveBookingPeriods from "@/components/LeaveBookingPeriods";
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import TabButton from "@/components/ui/TabButton";
+import { useSession } from "next-auth/react";
+import Loading from "@/components/Loading";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  //   const [globalLeaveBookingEnabled, setGlobalLeaveBookingEnabled] =
-  //     useState(true);
-
-  // Mock data - in real app, this would come from API
-  // eslint-disable-next-line
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@company.com",
-      status: "active",
-      joinDate: new Date("2023-01-15"),
-      department: "Engineering",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@company.com",
-      status: "active",
-      joinDate: new Date("2023-03-20"),
-      department: "Design",
-    },
-    {
-      id: "3",
-      name: "Mike Johnson",
-      email: "mike@company.com",
-      status: "suspended",
-      joinDate: new Date("2022-11-10"),
-      department: "Marketing",
-    },
-  ]);
-
+  const { data: session, status } = useSession();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [bookingPeriods, setBookingPeriods] = useState<LeaveBookingPeriod[]>([
     {
       id: "1",
@@ -52,15 +25,44 @@ export default function AdminDashboard() {
     },
   ]);
 
-  const stats: DashboardStats = {
-    totalMembers: teamMembers.length,
-    activeMembers: teamMembers.filter((m) => m.status === "active").length,
-    suspendedMembers: teamMembers.filter((m) => m.status === "suspended")
-      .length,
-    totalLeaveDays: 60, // Mock calculation
-    bookedLeaveDays: 15, // Mock calculation
-    remainingLeaveDays: 45, // Mock calculation
-  };
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        if (
+          !session ||
+          (session.user.role !== "ADMIN" && session.user.role !== "MANAGER")
+        ) {
+          return;
+        }
+        const res = await fetch("/api/v1/dashboard", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.message || "Failed to fetch dashboard stats");
+          return;
+        }
+
+        const { stats } = await res.json();
+        setStats(stats);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to fetch dashboard stats.");
+        }
+      }
+    };
+    fetchStats();
+  }, []); // eslint-disable-line
+
+  if (status === "loading") {
+    return <Loading />;
+  }
 
   return (
     <div className="mt-[65px] mb-[73px] md:my-0 min-h-[calc(100vh-138px)] md:h-screen dark:bg-gray-900 dark:text-gray-200 bg-white text-gray-800">
@@ -98,7 +100,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content */}
-        {activeTab === "overview" && <StatsCards stats={stats} />}
+        {activeTab === "overview" && stats && <StatsCards stats={stats} />}
         {activeTab === "periods" && (
           <LeaveBookingPeriods
             periods={bookingPeriods}
@@ -106,6 +108,7 @@ export default function AdminDashboard() {
           />
         )}
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }

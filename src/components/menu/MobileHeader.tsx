@@ -1,25 +1,30 @@
 // components/MobileHeader.tsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
 import { LogIn, LogOut } from "lucide-react";
 import Link from "next/link";
-import { mockUser } from "@/mock";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 export default function MobileHeader() {
   const { darkMode } = useTheme();
   const [showPopover, setShowPopover] = useState(false);
-  const [user, setUser] = useState(mockUser);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    // Force session refresh after authentication changes
+  }, [session]);
 
   // Toggle user login status (for demonstration)
-  const toggleLogin = () => {
-    setUser((prev) => ({
-      ...prev,
-      loggedIn: !prev.loggedIn,
-    }));
-    setShowPopover(false);
+  const handleLogin = () => {
+    if (session) {
+      signOut({ redirect: true, redirectTo: "/auth/signin" });
+    } else {
+      window.location.href = "/auth/signin";
+    }
   };
 
   return (
@@ -48,15 +53,15 @@ export default function MobileHeader() {
               onClick={() => setShowPopover(false)}
             >
               <p className="text-sm text-gray-700 dark:text-gray-200 mb-2">
-                Hello, {user.name}
+                Hello, {session?.user.name}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Assigned Role: {user.role}
+                Assigned Role: {session?.user.role}
               </p>
             </div>
           )}
           <ThemeSwitcher />
-          {user.loggedIn ? (
+          {session ? (
             <div
               className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => setShowPopover((prev) => !prev)}
@@ -77,11 +82,11 @@ export default function MobileHeader() {
             ""
           )}
           <button
-            onClick={toggleLogin}
+            onClick={handleLogin}
             className={`flex items-center p-2 rounded-md dark:text-gray-200 dark:hover:bg-gray-200 dark:hover:text-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white`}
-            title={user.loggedIn ? "Log out" : "Log in"}
+            title={session ? "Log out" : "Log in"}
           >
-            {user.loggedIn ? (
+            {session ? (
               <>
                 <LogOut size={20} />
               </>

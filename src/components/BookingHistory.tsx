@@ -1,13 +1,17 @@
-import { useState } from "react";
-import { LeaveBooking } from "../types";
+import { useState, useEffect } from "react";
+import { Bookings, Teams } from "@/types";
+import { parseDate } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import Loading from "@/components/Loading";
+import { toast, Toaster } from "react-hot-toast";
 
-interface BookingHistoryProps {
-  bookings: LeaveBooking[];
-}
-
-export default function BookingHistory({ bookings }: BookingHistoryProps) {
+export default function BookingHistory() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [bookings, setBookings] = useState<Bookings[]>([]);
+  const [teams, setTeams] = useState<Teams[]>([]);
+  const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
 
   const months = [
     "January",
@@ -24,31 +28,74 @@ export default function BookingHistory({ bookings }: BookingHistoryProps) {
     "December",
   ];
 
-  const filteredBookings = bookings.filter((booking) => {
-    const bookingDate = booking.startDate;
+  const filteredBookings = bookings.filter((booking: Bookings) => {
+    console.log(booking);
+    const bookingDate = parseDate(booking.date);
     return (
       bookingDate.getMonth() === selectedMonth &&
       bookingDate.getFullYear() === selectedYear
     );
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const query = new URLSearchParams();
 
-  const calculateDays = (startDate: Date, endDate: Date) => {
-    const timeDiff = endDate.getTime() - startDate.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-  };
+        // Use session data directly for immediate fetch (fallback to URL params)
+        const userId = session?.user.id;
+        const userRole = session?.user.role;
+
+        // Use session from the hook
+        if (userId) query.append("id", userId);
+        if (userRole) query.append("role", userRole.toLowerCase());
+
+        const res = await fetch(`api/v1/bookings/v?${query.toString()}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.message || "Failed to fetch bookings");
+          return;
+        }
+        const { bookings } = await res.json();
+
+        const resTeams = await fetch("/api/v1/teams", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!resTeams.ok) {
+          const err = await resTeams.json();
+          toast.error(err.message || "Failed to fetch teams");
+          return;
+        }
+        const { teams } = await resTeams.json();
+
+        setBookings(bookings);
+        setTeams(teams);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to fetch bookings & teams.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // eslint-disable-line
+
+  if (status === "loading" || isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="mt-16 md:mt-0 min-h-[calc(100vh-138px)] md:h-screen max-w-7xl mx-auto px-4 py-8 bg-white dark:bg-gray-900">
@@ -108,49 +155,35 @@ export default function BookingHistory({ bookings }: BookingHistoryProps) {
                     Member
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium dark:text-gray-100 text-gray-900 uppercase tracking-wider">
-                    Dates
+                    Team
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium dark:text-gray-100 text-gray-900 uppercase tracking-wider">
-                    Days
+                    Leave date
                   </th>
+
                   <th className="px-4 py-3 text-left text-xs font-medium dark:text-gray-100 text-gray-900 uppercase tracking-wider">
-                    Reason
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium dark:text-gray-100 text-gray-900 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium dark:text-gray-100 text-gray-900 uppercase tracking-wider">
-                    Requested
+                    Created
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredBookings.map((booking) => (
+                {filteredBookings.map((booking: Bookings) => (
                   <tr key={booking.id} className="dark:bg-gray-900 bg-white">
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium dark:text-gray-100 text-gray-900">
-                      {booking.memberName}
+                      {booking.title}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm dark:text-gray-100 text-gray-900">
-                      {booking.startDate.toLocaleDateString()} -{" "}
-                      {booking.endDate.toLocaleDateString()}
+                      Team{" "}
+                      {teams.find((team) => team.id === booking.teamId)
+                        ?.alias || "N/A"}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm dark:text-gray-100 text-gray-900">
-                      {calculateDays(booking.startDate, booking.endDate)}
+                      {booking.date}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm dark:text-gray-100 text-gray-900">
-                      {booking.reason}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                          booking.status
-                        )}`}
-                      >
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm dark:text-gray-100 text-gray-900">
-                      {booking.createdAt.toLocaleDateString()}
+                      {booking?.createdAt
+                        ? new Date(booking.createdAt).toLocaleString()
+                        : ""}
                     </td>
                   </tr>
                 ))}
@@ -159,6 +192,7 @@ export default function BookingHistory({ bookings }: BookingHistoryProps) {
           </div>
         )}
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }

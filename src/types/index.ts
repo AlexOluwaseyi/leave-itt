@@ -1,3 +1,14 @@
+import { Home, Users, Settings, LayoutDashboard, History, UserRound } from "lucide-react";
+
+export const NavLinks = [
+  { icon: Home, text: "Home", href: "/" },
+  { icon: LayoutDashboard, text: "Dashboard", href: "/dashboard" },
+  { icon: Users, text: "Teams", href: "/teams" },
+  { icon: History, text: "History", href: "/history" },
+  { icon: Settings, text: "Settings", href: "/settings" },
+  { icon: UserRound, text: "Profile", href: "/profile" },
+];
+
 export interface LeaveBooking {
   id: string;
   memberId: string;
@@ -21,21 +32,48 @@ export interface LeaveBookingPeriod {
 export interface DashboardStats {
   totalMembers: number;
   activeMembers: number;
-  suspendedMembers: number;
+  inactiveMembers: number;
   totalLeaveDays: number;
   bookedLeaveDays: number;
   remainingLeaveDays: number;
 }
 
-export interface UserData {
+export type Users = {
+  id: string;
   name: string;
-  email: string;
+  username: string;
+  role: "ADMIN" | "MANAGER" | "MEMBER";
+  status: "ACTIVE" | "INACTIVE";
   password: string;
-  isAdmin: boolean;
-}
+  teamId?: string;
+  managerId?: string;
+  team?: { alias: string; }
+} & Partial<{
+  createdAt: Date;
+  updatedAt: Date;
+}>;
 
-export interface AddTeamMemberModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddUser?: (userData: UserData) => void;
-}
+export type CreateUserData = Omit<Users, 'id' | 'createdAt' | 'updatedAt' | 'team'>
+
+export type Teams = {
+  id: string;
+  alias: string;
+  managerId?: string;
+  members?: Users[];
+} & Partial<{
+  createdAt: Date;
+  updatedAt: Date;
+}>
+
+export type CreateTeamData = Omit<Teams, 'id' | 'managerId' | 'createdAt' | 'updatedAt' | 'members'>;
+
+export type Bookings = {
+  id: string;
+  title?: string;
+  date: string;
+  teamId: string;
+  userId: string;
+} & Partial<{
+  createdAt: Date;
+  updatedAt: Date;
+}>;

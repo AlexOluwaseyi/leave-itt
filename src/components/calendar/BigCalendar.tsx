@@ -10,6 +10,11 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import CustomCalendarToolbar from "@@/calendar/CustomCalendarToolbar";
 import BookLeaveModal from "@@/modals/BookLeaveModal";
 import { useTheme } from "@/context/ThemeContext";
+import Loading from "@@/Loading";
+import { useSession } from "next-auth/react";
+import { Bookings } from "@/types";
+import { parseDate } from "@/lib/utils";
+import { toast, Toaster } from "react-hot-toast";
 
 const locales = {
   "en-US": import("date-fns/locale/en-US"),
@@ -135,6 +140,9 @@ const BigCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   // const [currentView, setCurrentView] = useState<View>("month");
   const { darkMode } = useTheme();
+  const { data: session, status } = useSession();
+  const [isLoading, setisLoading] = useState(true);
+  const [calendarEvents, setCalendarEvents] = useState([]);
 
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     // Check if the selected date is in the same month as the current view
@@ -156,8 +164,65 @@ const BigCalendar = () => {
     injectCalendarStyles(darkMode);
   }, [darkMode]);
 
+  // Fetch bookings as events
+  useEffect(() => {
+    if (session) {
+      setisLoading(true);
+      fetchBookings();
+    }
+    const intervalId = setInterval(fetchBookings, 5000);
+    setisLoading(false);
+    return () => clearInterval(intervalId);
+  }, []); // eslint-disable-line
+
+  const fetchBookings = async () => {
+    try {
+      // setisLoading(true); // Moved to useEffect, reload only when page mounts.
+      const query = new URLSearchParams();
+
+      // Use session data directly for immediate fetch (fallback to URL params)
+      const userId = session?.user.id;
+      const userRole = session?.user.role;
+
+      // Use session from the hook
+      if (userId) query.append("id", userId);
+      if (userRole) query.append("role", userRole.toLowerCase());
+
+      const res = await fetch(`api/v1/bookings?${query.toString()}`, {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.message || "Failed to fetch dashboard stats");
+        return;
+      }
+      const { bookings } = await res.json();
+
+      const mappedEvents = bookings.map((booking: Bookings) => ({
+        id: booking.id,
+        title: booking.title,
+        start: parseDate(booking.date),
+        end: parseDate(booking.date),
+      }));
+
+      setCalendarEvents(mappedEvents);
+      setisLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to fetch dashboard stats.");
+      }
+    }
+  };
+
+  if (isLoading || status === "loading") {
+    return <Loading />;
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center w-full mx-auto min-h-[calc(100vh-138px)] md:h-screen md:my-0 dark:bg-gray-900 dark:text-white bg-white text-gray-900">
+    <div className="flex flex-col items-center justify-center w-full mx-auto min-h-[calc(100vh-138px)] md:h-screen md:my-0 dark:bg-gray-900 dark:text-white bg-white text-gray-900 mt-16 md:mt-0">
       <div className="w-full max-w-3xl p-4  rounded dark:bg-gray-900 dark:text-white bg-white text-gray-900">
         <Calendar
           key={currentDate.toISOString()}
@@ -165,10 +230,11 @@ const BigCalendar = () => {
           components={{
             toolbar: CustomCalendarToolbar,
           }}
+          events={calendarEvents}
           tooltipAccessor={"title"}
           startAccessor="start"
           endAccessor="end"
-          style={{ height: 500 }}
+          style={{ height: 500, overflow: "auto" }}
           date={currentDate}
           defaultView="month"
           onSelectSlot={handleSelectSlot}
@@ -180,13 +246,20 @@ const BigCalendar = () => {
       <p className="mt-4 text-gray-600">Powered by React Big Calendar</p>
 
       {/* Modal */}
-      <BookLeaveModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        slotInfo={selectedSlot}
-      />
+      {session && (
+        <BookLeaveModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          session={session}
+          slotInfo={selectedSlot}
+          onSuccess={fetchBookings}
+        />
+      )}
+      <Toaster position="top-center" />
     </div>
   );
 };
+
+// session={{ userId: session.user?.id }}
 
 export default BigCalendar;

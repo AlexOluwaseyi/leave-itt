@@ -1,13 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogOut, LogIn, Pin } from "lucide-react";
 import Image from "next/image";
 import ThemeSwitcher from "@@/ThemeSwitcher";
 import { useTheme } from "@/context/ThemeContext";
 import { useSidebarPin } from "@/context/SidebarPinContext";
 import { usePathname } from "next/navigation";
-import { navLinks, mockUser } from "@/mock";
+import { NavLinks } from "@/types";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   children?: React.ReactNode;
@@ -16,24 +18,27 @@ interface SidebarProps {
 export default function Sidebar({ children }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
-  const [user, setUser] = useState(mockUser);
   const { darkMode } = useTheme();
   const { pinned, togglePin } = useSidebarPin();
   const pathname = usePathname();
+  const { data: session } = useSession();
 
-  // Toggle user login status (for demonstration)
-  const toggleLogin = () => {
-    setUser((prev) => ({
-      ...prev,
-      loggedIn: !prev.loggedIn,
-    }));
+  useEffect(() => {
+    // Force session refresh after authentication changes
+  }, [session]);
+
+  const handleLogin = () => {
+    if (session) {
+      signOut({ redirect: true, redirectTo: "/auth/signin" });
+    } else {
+      window.location.href = "/auth/signin";
+    }
   };
 
   // Update togglePin to use context
   const handleTogglePin = () => {
     togglePin();
     if (!pinned) {
-      // This will be the old value since toggle happens after
       setCollapsed(false);
       setShowSidebar(true);
     }
@@ -104,7 +109,7 @@ export default function Sidebar({ children }: SidebarProps) {
         {/* Nav Links */}
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-2 px-2">
-            {navLinks.map((link, index) => (
+            {NavLinks.map((link, index) => (
               <li key={index}>
                 <a
                   href={link.href}
@@ -144,7 +149,7 @@ export default function Sidebar({ children }: SidebarProps) {
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-4">
           {/* User info when logged in */}
-          {user.loggedIn && (
+          {session && (
             <div
               className={`flex items-center mb-4 ${
                 collapsed && !pinned ? "justify-center" : ""
@@ -163,9 +168,9 @@ export default function Sidebar({ children }: SidebarProps) {
               />
               {(!collapsed || pinned) && (
                 <div className="ml-3">
-                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-sm font-medium">{session.user.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    User
+                    {session.user.role}
                   </p>
                 </div>
               )}
@@ -188,13 +193,13 @@ export default function Sidebar({ children }: SidebarProps) {
             />
 
             <button
-              onClick={toggleLogin}
+              onClick={handleLogin}
               className={`flex items-center p-2 rounded-md dark:text-gray-200 dark:hover:bg-gray-200 dark:hover:text-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white ${
                 collapsed && !pinned ? "" : "space-x-2"
               }`}
-              title={user.loggedIn ? "Log out" : "Log in"}
+              title={session?.user ? "Log out" : "Log in"}
             >
-              {user.loggedIn ? (
+              {session ? (
                 <>
                   <LogOut size={20} />
                   {(!collapsed || pinned) && <span>Logout</span>}
