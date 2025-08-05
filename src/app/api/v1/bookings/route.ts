@@ -11,13 +11,8 @@ export async function GET(request: NextRequest) {
     let bookings
 
     if (id && (role === 'manager' || role === 'member')) {
-      console.log("getting bookings for team")
       bookings = await getBookingsByTeam(id);
-      // } else if (role === 'member') {
-      //   console.log("getting bookings for user")
-      //   bookings = await getBookingsByUserId(id)
     } else {
-      console.log("getting all bookings")
       bookings = await getBookings()
     }
 
