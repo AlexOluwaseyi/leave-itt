@@ -167,14 +167,17 @@ const BigCalendar = () => {
   // Fetch bookings as events
   useEffect(() => {
     if (session) {
+      setisLoading(true);
       fetchBookings();
     }
+    const intervalId = setInterval(fetchBookings, 5000);
     setisLoading(false);
-  }, [session]); // eslint-disable-line
+    return () => clearInterval(intervalId);
+  }, []); // eslint-disable-line
 
   const fetchBookings = async () => {
     try {
-      setisLoading(true);
+      // setisLoading(true); // Moved to useEffect, reload only when page mounts.
       const query = new URLSearchParams();
 
       // Use session data directly for immediate fetch (fallback to URL params)
