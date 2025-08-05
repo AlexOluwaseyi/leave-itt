@@ -14,25 +14,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* .dark {
-  --background: #be0000b1;
-  --foreground: #ededed;
-} */
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #ededed;
-    --foreground: #0a0a0a;
-  }
-} */
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -46,5 +27,27 @@ body {
 
   .rbc-today {
     @apply !bg-green-700 !text-white;
+  }
+}
+
+@layer components {
+  /* This is the custom CSS to remove autofill background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    /* Use a box-shadow to cover the autofill background. */
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+
+    /* Set text color to black (or your desired color). */
+    -webkit-text-fill-color: black;
+
+    /* A fallback for smooth transitions. */
+    transition: background-color 5000s ease-in-out 0s;
   }
 }

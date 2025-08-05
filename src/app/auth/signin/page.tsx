@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 // Import signIn and signOut functions from auth library
 import { signIn } from "next-auth/react";
@@ -53,17 +54,19 @@ export default function Login() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-sm"
         style={{
           backgroundImage:
-            'url("https://images.unsplash.com/photo-1538481199705-c710c4e965fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1650&q=80")',
+            'url("https://images.pexels.com/photos/1230302/pexels-photo-1230302.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop")',
         }}
       />
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative z-10">
+      <GlassCard className="p-8 rounded-xl shadow-2xl w-full max-w-md relative z-10">
+        {/* <div className="> */}
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Welcome Back!
+          LOGIN
         </h2>
+
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 "
               htmlFor="username"
             >
               Username
@@ -74,7 +77,7 @@ export default function Login() {
               value={username}
               placeholder="Username"
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 text-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 text-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 "
               required
             />
           </div>
@@ -114,7 +117,8 @@ export default function Login() {
             Sign in
           </button>
         </form>
-      </div>
+        {/* </div> */}
+      </GlassCard>
       <Toaster position="top-center" />
     </div>
   );
