@@ -28,7 +28,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        if (!session || session.user.role !== "ADMIN") {
+        if (
+          !session ||
+          (session.user.role !== "ADMIN" && session.user.role !== "MANAGER")
+        ) {
           return;
         }
         const res = await fetch("/api/v1/dashboard", {
@@ -59,16 +62,6 @@ export default function AdminDashboard() {
 
   if (status === "loading") {
     return <Loading />;
-  }
-
-  if (!session || session.user.role !== "ADMIN") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-          Access Denied
-        </h1>
-      </div>
-    );
   }
 
   return (
