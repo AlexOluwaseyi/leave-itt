@@ -387,19 +387,19 @@ export default function TeamMembersContent() {
       <AddUserModal
         isOpen={isAddUserDialogOpen}
         onCloseAction={() => setIsAddUserDialogOpen(false)}
-        onSuccess={fetchData}
+        onSuccessAction={fetchData}
       />
 
       <BulkImportUsersModal
         isOpen={isBulkImportDialogOpen}
         onCloseAction={() => setIsBulkImportDialogOpen(false)}
-        onSuccess={fetchData}
+        onSuccessAction={fetchData}
       />
 
       <CreateTeamModal
         isOpen={isCreateTeamDialogOpen}
         onCloseAction={() => setIsCreateTeamDialogOpen(false)}
-        onSuccess={fetchData}
+        onSuccessAction={fetchData}
       />
       <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
     </div>
