@@ -136,11 +136,11 @@ export function useSessionUrlManager({
 function getFallbackRoute(userRole: string): string {
   switch (userRole) {
     case "ADMIN":
-      return "/"; // Dashboard
+      return "/dashboard"; // Dashboard
     case "MANAGER":
-      return "/"; // Dashboard
+      return "/teams"; // Teams
     case "MEMBER":
-      return "/"; // Dashboard (members can access dashboard)
+      return "/"; // Home (return members to home)
     default:
       return "/auth/signin";
   }
