@@ -178,7 +178,7 @@ export default function TeamMembersContent() {
   }
 
   return (
-    <div className="mt-[65px] mb-[73px] md:my-0 h-[calc(100vh-138px)] md:h-screen max-w-7xl mx-auto px-4 bg-white dark:bg-gray-900">
+    <div className="mt-[65px] mb-[73px] md:my-0 h-[calc(100vh-138px)] md:h-screen max-w-7xl mx-auto px-4 py-6 bg-white dark:bg-gray-900">
       <h1 className="text-3xl font-bold mb-6 dark:text-gray-200 text-gray-900">
         Team Management
       </h1>
@@ -295,9 +295,9 @@ export default function TeamMembersContent() {
       </div>
 
       {/* Users Table */}
-      <div className="overflow-x-auto border-2 rounded-lg dark:border-gray-100 border-gray-900">
+      <div className="overflow-x-auto h-3/4 md:h-2/3 overflow-y-auto border-2 rounded-lg dark:border-gray-100 border-gray-900">
         <table className="min-w-full divide-y divide-gray-400">
-          <thead className="dark:bg-gray-900 bg-white">
+          <thead className="dark:bg-gray-900 bg-white sticky top-0">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider dark:text-gray-100 text-gray-900">
                 Name

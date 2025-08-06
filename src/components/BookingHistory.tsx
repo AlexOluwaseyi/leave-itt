@@ -98,7 +98,7 @@ export default function BookingHistory() {
   }
 
   return (
-    <div className="mt-16 md:mt-0 min-h-[calc(100vh-138px)] md:h-screen max-w-7xl mx-auto px-4 py-8 bg-white dark:bg-gray-900">
+    <div className="mt-16 md:mt-0 h-[calc(100vh-138px)] md:h-screen max-w-7xl mx-auto px-4 py-8 bg-white dark:bg-gray-900">
       <h1 className="text-3xl font-bold mb-6 dark:text-gray-200 text-gray-900">
         Leave History
       </h1>
@@ -126,7 +126,10 @@ export default function BookingHistory() {
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
             className="dark:text-gray-100 text-gray-900 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {[2024, 2025, 2026].map((year) => (
+            {Array.from(
+              { length: 3 },
+              (_, i) => new Date().getFullYear() + i
+            ).map((year) => (
               <option
                 className="dark:bg-gray-900 bg-white dark:text-gray-100 text-gray-900"
                 key={year}
@@ -139,7 +142,7 @@ export default function BookingHistory() {
         </div>
       </div>
 
-      <div className="py-6">
+      <div className="py-6 h-4/5 overflow-hidden">
         {filteredBookings.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500">
@@ -147,9 +150,9 @@ export default function BookingHistory() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto border-2 rounded-lg dark:border-gray-100 border-gray-900 divide-y divide-gray-400">
-            <table className="w-full divide-y divide-gray-400">
-              <thead className="dark:bg-gray-900 bg-white">
+          <div className="overflow-x-auto h-full border-2 rounded-lg dark:border-gray-100 border-gray-900 divide-y divide-gray-400 overflow-y-auto">
+            <table className="w-full overflow-auto divide-y divide-gray-400">
+              <thead className="dark:bg-gray-900 bg-white sticky top-0">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium dark:text-gray-100 text-gray-900 uppercase tracking-wider">
                     Member
