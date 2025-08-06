@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getUsers, getUserbyTeam, addUser, importBulkUsers } from "@/lib/users";
+import { getUsers, getUserbyTeam, addUser, addAdminUser, importBulkUsers } from "@/lib/users";
 
 
 export async function GET(request: NextRequest) {
@@ -61,15 +61,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await addUser({
-      name,
-      username,
-      password,
-      role,
-      status,
-      teamId,
-      managerId,
-    });
+    let user;
+
+    if (role === "ADMIN") {
+      user = await addAdminUser({ name, username, password, role, status });
+    } else {
+      user = await addUser({
+        name,
+        username,
+        password,
+        role,
+        status,
+        teamId,
+        managerId,
+      });
+    }
 
     return NextResponse.json({ message: "User created", user }, { status: 201 });
   } catch (error) {
