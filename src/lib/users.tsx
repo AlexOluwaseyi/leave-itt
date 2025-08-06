@@ -565,3 +565,54 @@ export async function importBulkUsers(
     );
   }
 }
+
+export async function addAdminUser(userData: CreateUserData) {
+  try {
+    // Get manager ID from session
+    const session = await auth();
+
+    if (!session || !session.user) {
+      throw new Error("No user session found.");
+    }
+
+    const { id, role } = session.user;
+
+    if (!id || !role) {
+      throw new Error("User not authenticated or role not found.");
+    }
+
+    // If signed in user is a member, not manager or admin
+    if (role === "MEMBER") {
+      throw new Error("User not authorized to add users.");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newUser = await prisma.user.create({
+      data: {
+        ...userData,
+        password: await bcrypt.hash(userData.password, salt),
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        role: true,
+        status: true,
+        teamId: true,
+        managerId: true,
+        team: {
+          select: {
+            alias: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    return newUser;
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to add admin user"
+    );
+  }
+}
