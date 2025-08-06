@@ -178,7 +178,7 @@ export default function TeamMembersContent() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 py-8 bg-white dark:bg-gray-900">
+    <div className="mt-[65px] mb-[73px] md:my-0 h-[calc(100vh-138px)] md:h-screen max-w-7xl mx-auto px-4 bg-white dark:bg-gray-900">
       <h1 className="text-3xl font-bold mb-6 dark:text-gray-200 text-gray-900">
         Team Management
       </h1>
